@@ -10,9 +10,10 @@ import * as React from 'react';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
-import TabOneScreen from '../screens/TabOneScreen';
-import TabTwoScreen from '../screens/TabTwoScreen';
-import { BottomTabParamList, TabOneParamList, TabTwoParamList } from '../types';
+import HistoryScreen from '../screens/HistoryScreen';
+import ScanScreen from '../screens/ScanScreen';
+import WishlistScreen from '../screens/WishlistScreen';
+import { BottomTabParamList, HistoryParamList, ScanParamList, WishlistParamList } from '../types';
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -21,20 +22,27 @@ export default function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="Scan"
       tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}>
       <BottomTab.Screen
-        name="TabOne"
-        component={TabOneNavigator}
+        name="History"
+        component={HistoryNavigator}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="file-tray" color={color} />,
         }}
       />
       <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoNavigator}
+        name="Scan"
+        component={ScanNavigator}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="ios-camera" color={color} />,
+        }}
+      />
+      <BottomTab.Screen
+        name="Wishlist"
+        component={WishlistNavigator}
+        options={{
+          tabBarIcon: ({ color }) => <TabBarIcon name="star" color={color} />,
         }}
       />
     </BottomTab.Navigator>
@@ -49,30 +57,44 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof Ionicons>['name']
 
 // Each tab has its own navigation stack, you can read more about this pattern here:
 // https://reactnavigation.org/docs/tab-based-navigation#a-stack-navigator-for-each-tab
-const TabOneStack = createStackNavigator<TabOneParamList>();
+const HistoryStack = createStackNavigator<HistoryParamList>();
 
-function TabOneNavigator() {
+function HistoryNavigator() {
   return (
-    <TabOneStack.Navigator>
-      <TabOneStack.Screen
-        name="TabOneScreen"
-        component={TabOneScreen}
-        options={{ headerTitle: 'Tab One Title' }}
+    <HistoryStack.Navigator>
+      <HistoryStack.Screen
+        name="HistoryScreen"
+        component={HistoryScreen}
+        options={{ headerTitle: 'History' }}
       />
-    </TabOneStack.Navigator>
+    </HistoryStack.Navigator>
   );
 }
 
-const TabTwoStack = createStackNavigator<TabTwoParamList>();
+const ScanStack = createStackNavigator<ScanParamList>();
 
-function TabTwoNavigator() {
+function ScanNavigator() {
   return (
-    <TabTwoStack.Navigator>
-      <TabTwoStack.Screen
-        name="TabTwoScreen"
-        component={TabTwoScreen}
-        options={{ headerTitle: 'Tab Two Title' }}
+    <ScanStack.Navigator>
+      <ScanStack.Screen
+        name="ScanScreen"
+        component={ScanScreen}
+        options={{ headerTitle: 'Scan' }}
       />
-    </TabTwoStack.Navigator>
+    </ScanStack.Navigator>
+  );
+}
+
+const WishlistStack = createStackNavigator<WishlistParamList>();
+
+function WishlistNavigator() {
+  return (
+    <WishlistStack.Navigator>
+      <WishlistStack.Screen
+        name="WishlistScreen"
+        component={WishlistScreen}
+        options={{ headerTitle: 'Wishlist' }}
+      />
+    </WishlistStack.Navigator>
   );
 }

@@ -12,14 +12,19 @@ export default {
     screens: {
       Root: {
         screens: {
-          TabOne: {
+          History: {
             screens: {
-              TabOneScreen: 'one',
+              HistoryScreen: 'history',
             },
           },
-          TabTwo: {
+          Scan: {
             screens: {
-              TabTwoScreen: 'two',
+              ScanScreen: 'scan',
+            },
+          },
+          Wishlist: {
+            screens: {
+              WishlistScreen: 'wishlist',
             },
           },
         },

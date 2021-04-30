@@ -1,2 +1,8 @@
-# what-ae-brick
-What Æ brick?
+# What Æ brick?
+
+## Development
+
+```sh
+yarn
+yarn start
+```
