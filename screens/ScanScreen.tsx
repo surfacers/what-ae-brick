@@ -5,10 +5,10 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
+import BarcodeMask from 'react-native-barcode-mask';
 
 export default function HistoryScreen() {
   const [hasPermission, setHasPermission] = useState<boolean>(false);
-  const [type, setType] = useState(Camera.Constants.Type.back);
 
   useEffect(() => {
     (async () => {
@@ -25,18 +25,12 @@ export default function HistoryScreen() {
   }
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} type={type}>
+      <Camera style={styles.camera}>
+        <BarcodeMask height={200} width={200} lineAnimationDuration={1000}></BarcodeMask>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setType(
-                type === Camera.Constants.Type.back
-                  ? Camera.Constants.Type.front
-                  : Camera.Constants.Type.back
-              );
-            }}>
-            <Text style={styles.text}> Flip </Text>
+            style={styles.button}>
+              <View style={styles.shutterButton}></View>
           </TouchableOpacity>
         </View>
       </Camera>
@@ -55,6 +49,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     margin: 20,
   },
   button: {
@@ -66,4 +62,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'white',
   },
+  shutterButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    backgroundColor: 'white'
+  }
 });
