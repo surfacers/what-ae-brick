@@ -20,6 +20,8 @@ export type HistoryParamList = {
 
 export type ScanParamList = {
   ScanScreen: undefined;
+  ResultScreen: { id: number; certainty: number };
+  ErrorScreen: { error: Error };
 };
 
 export type WishlistParamList = {
