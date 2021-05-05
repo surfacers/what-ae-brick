@@ -1,14 +1,11 @@
 import React, { useRef } from "react";
-import { createMachine } from "xstate";
+import { assign, createMachine } from "xstate";
 import { createModel } from "xstate/lib/model";
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import { Camera } from "expo-camera";
 import CameraMask from "react-native-barcode-mask";
 import { useMachine } from "@xstate/react";
-
-type ScanMachineContext = {
-  uris: string[];
-};
+import { raise } from "xstate/lib/actions";
 
 const scanModel = createModel(
   {
@@ -19,37 +16,126 @@ const scanModel = createModel(
       SHUTTER_PRESSED: () => ({}),
       SHUTTER_RELEASED: () => ({}),
       SHUTTER_CANCELED: () => ({}),
+      TAKE_PICTURE: () => ({}),
+      RESTART: () => ({}),
     },
   }
 );
 
 const scanMachine = createMachine<typeof scanModel>(
   {
+    id: "scan",
     initial: "idle",
     context: scanModel.initialContext,
     states: {
       idle: {
+        entry: [assign(() => scanModel.initialContext)],
         on: {
-          SHUTTER_PRESSED: "pressingShutter",
+          SHUTTER_PRESSED: "scanning",
         },
       },
-      pressingShutter: {
-        tags: "pressing",
+      scanning: {
         on: {
-          SHUTTER_RELEASED: "idle",
+          SHUTTER_CANCELED: "idle",
         },
-        after: {
-          MULTIPLE_PICTURES_DELAY: { actions: "takePicture" },
+        initial: "first",
+        type: "parallel",
+        states: {
+          shutter: {
+            initial: "pressed",
+            states: {
+              pressed: {
+                on: {
+                  SHUTTER_RELEASED: {
+                    target: "released",
+                    actions: [raise("TAKE_PICTURE")],
+                  },
+                },
+                after: {
+                  SHUTTER_HOLDING: {
+                    target: "holding",
+                    actions: [raise("TAKE_PICTURE")],
+                  },
+                },
+              },
+              holding: {
+                on: {
+                  SHUTTER_RELEASED: {
+                    target: "released",
+                    actions: [raise("TAKE_PICTURE")],
+                  },
+                },
+                after: {
+                  MULTIPLE_PICTURES_DELAY: {
+                    target: "holding",
+                    actions: [raise("TAKE_PICTURE")],
+                  },
+                },
+              },
+              released: {
+                type: "final",
+              },
+            },
+          },
+          picture: {
+            initial: "idle",
+            states: {
+              idle: {
+                type: "final",
+                on: {
+                  TAKE_PICTURE: "taking",
+                },
+              },
+              taking: {
+                invoke: {
+                  id: "takePicture",
+                  src: "takePicture",
+                  onDone: {
+                    target: "idle",
+                    actions: [
+                      assign({
+                        uris: (context, event) => [...context.uris, event.data],
+                      }),
+                    ],
+                  },
+                  onError: "idle",
+                },
+              },
+            },
+          },
+        },
+        onDone: "preprocessing",
+      },
+      preprocessing: {
+        invoke: {
+          src: "preprocessImages",
+          onDone: "detecting",
+        },
+      },
+      detecting: {
+        invoke: {
+          src: "detectBrick",
+          onDone: "brick_detected",
+          onError: "brick_not_detected",
+        },
+      },
+      brick_detected: {
+        type: "final",
+        on: {
+          RESTART: "idle",
+        },
+      },
+      brick_not_detected: {
+        type: "final",
+        on: {
+          RESTART: "idle",
         },
       },
     },
   },
   {
-    actions: {
-      test: () => {},
-    },
-    services: {},
     delays: {
+      SHUTTER_HOLDING: 300,
       MULTIPLE_PICTURES_DELAY: 500,
     },
   }
