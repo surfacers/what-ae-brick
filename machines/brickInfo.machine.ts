@@ -1,20 +1,16 @@
-import { useMachine } from "@xstate/react";
-import { useEffect } from "react";
 import { assign, createMachine } from "xstate";
-import { raise } from "xstate/lib/actions";
 import NetInfo from "@react-native-community/netinfo";
-import { cond } from "react-native-reanimated";
 
 const rebrickableApi = 'https://rebrickable.com/api/v3/lego'
 const key = '23062b8c5ce6051cf1be80b5a29be1a2';
 
 export type DetailEvent = {type: 'RETRY_LOADING'};
 
-export interface DetailContext {
-    images: Array<Object>;
+export interface BrickInfoContext {
+    images?: Array<Object>;
     partId: number;
-    partData?: Response;
-    colorData?: Response;
+    partData?: any;
+    colorData?: any;
 };
 
 const fetchPartData = (partId: number) =>
@@ -32,22 +28,17 @@ const fetchColorData = (partId: number) => fetch(`${rebrickableApi}/parts/${part
 const fetchOffline = fetchPartData; // TODO: implement offline capabilities
 
 
-const brickInfoMachine = createMachine<DetailContext, DetailEvent>({
+export const brickInfoMachine = createMachine<BrickInfoContext, DetailEvent>({
     id: 'brickInfo',
     initial: 'loading',
-    context: {
-        images: images,
-        partId: 3001,
-        partData: undefined,
-        colorData: undefined
-    },
     states: {
         loading: {
             initial: 'checkingConnection',
+            tags: "loading",
             states: {
                 checkingConnection: {
+                    tags: "loading",
                     invoke: {
-                        tags: "loading",
                         id: 'checkingConnection',
                         src: () => checkConnection(),
                         onDone: {
@@ -60,6 +51,7 @@ const brickInfoMachine = createMachine<DetailContext, DetailEvent>({
                     initial: 'fetchPartData',
                     states: {
                         fetchPartData: {
+                            tags: "loading",
                             invoke: {
                                 id: 'fetchPartData',
                                 src: (context, _) => fetchPartData(context.partId),
@@ -74,6 +66,7 @@ const brickInfoMachine = createMachine<DetailContext, DetailEvent>({
                             }
                         },
                         fetchColorData: {
+                            tags: "loading",
                             invoke: {
                                 id: 'fetchColorData',
                                 src: (context, _) => fetchColorData(context.partId),
@@ -91,9 +84,10 @@ const brickInfoMachine = createMachine<DetailContext, DetailEvent>({
                     }
                 },
                 offline: {
+                    tags: "loading",
                     invoke: {
                         id: 'fetchOffline',
-                        src: fetchOffline,
+                        src: (context, _) => fetchOffline(context.partId),
                         onDone: '..loaded',
                         onError: '..loadingFailed'
                     }
