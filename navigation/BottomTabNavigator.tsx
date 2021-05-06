@@ -10,6 +10,7 @@ import * as React from 'react';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
+import BrickDetailScreen from '../screens/BrickDetailScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import ScanScreen from '../screens/ScanScreen';
 import WishlistScreen from '../screens/WishlistScreen';
@@ -66,6 +67,12 @@ function HistoryNavigator() {
         name="HistoryScreen"
         component={HistoryScreen}
         options={{ headerTitle: 'History' }}
+      />
+      
+      <HistoryStack.Screen
+        name="BrickDetailScreen"
+        component={BrickDetailScreen}
+        options={{ headerTitle: 'BrickInfo' }}
       />
     </HistoryStack.Navigator>
   );

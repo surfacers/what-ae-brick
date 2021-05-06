@@ -2,36 +2,36 @@ import { useMachine } from "@xstate/react";
 import { useEffect } from "react";
 import { assign, createMachine } from "xstate";
 import { raise } from "xstate/lib/actions";
-import { NetInfo } from "react-native";
+import NetInfo from "@react-native-community/netinfo";
 import { cond } from "react-native-reanimated";
 
-//const checkConnection = (_, _) => "";
-//const fetchPartData = (context, event) => "";
-//const fetchColorData = (context, event) => "";
-
-//const fetchOffline = (context, event) => "";
-
 const rebrickableApi = 'https://rebrickable.com/api/v3/lego'
+const key = '23062b8c5ce6051cf1be80b5a29be1a2';
+
 export type DetailEvent = {type: 'RETRY_LOADING'};
+
 export interface DetailContext {
     images: Array<Object>;
     partId: number;
     partData?: Response;
     colorData?: Response;
 };
-const key = '23062b8c5ce6051cf1be80b5a29be1a2';
+
 const fetchPartData = (partId: number) =>
     fetch(`${rebrickableApi}/parts/${partId}/?key=${key}`).then((response) => response.json());
 
-const checkConnection = () => NetInfo.isConnected.fetch().done((isConnected: boolean){
-    if(!isConnected) {
+const checkConnection = () => NetInfo.fetch().then(state => {
+    if(!state.isConnected) {
         throw Error("No Connection");
     }
-    return isConnected;
+    return state.isConnected;
 });
+
 const fetchColorData = (partId: number) => fetch(`${rebrickableApi}/parts/${partId}/colors/?key=${key}`).then((response) => response.json());
-const fetchOffline = fetchPartData;
-const images: Array<Object> = [];
+
+const fetchOffline = fetchPartData; // TODO: implement offline capabilities
+
+
 const brickInfoMachine = createMachine<DetailContext, DetailEvent>({
     id: 'brickInfo',
     initial: 'loading',
@@ -111,32 +111,3 @@ const brickInfoMachine = createMachine<DetailContext, DetailEvent>({
         }
     },
 });
-
-
-
-// on: {
-//     ADD_TO_WISHLIST: '',
-//     CHANGE_COLOR: '',
-//     ADD_BRICK: {
-//         actions: 'addBrick'
-//     },
-//     REMOVE_BRICK: {
-//         actions: 'removeBrick',
-//         cond: 'canRemoveBrick'
-//     }
-// },,
-    // {
-    //     guards: {
-    //         canRemoveBrick: (context, event) => {
-    //             return context.amount > 1;
-    //         },
-    //     },
-    //     actions: {
-    //         addBrick: assign({
-    //             amount: (context) => context.amount + 1,
-    //         }),
-    //         removeBrick: assign({
-    //             amount: (context) => context.amount - 1,
-    //         })
-    //     }
-    // },

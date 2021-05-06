@@ -16,6 +16,7 @@ export type BottomTabParamList = {
 
 export type HistoryParamList = {
   HistoryScreen: undefined;
+  BrickDetailScreen: {brickId:number, images:Array<string>};
 };
 
 export type ScanParamList = {
