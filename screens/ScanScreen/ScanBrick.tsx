@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { assign, createMachine } from "xstate";
 import { createModel } from "xstate/lib/model";
-import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Text, Button } from "react-native";
 import { Camera } from "expo-camera";
 import CameraMask from "react-native-barcode-mask";
 import { useMachine } from "@xstate/react";
@@ -78,10 +78,9 @@ const scanMachine = createMachine<typeof scanModel>(
             },
           },
           picture: {
-            initial: "idle",
+            initial: "initial",
             states: {
-              idle: {
-                type: "final",
+              initial: {
                 on: {
                   TAKE_PICTURE: "taking",
                 },
@@ -101,15 +100,28 @@ const scanMachine = createMachine<typeof scanModel>(
                   onError: "idle",
                 },
               },
+              idle: {
+                type: "final",
+                on: {
+                  TAKE_PICTURE: "taking",
+                },
+              },
             },
           },
         },
         onDone: "preprocessing",
       },
       preprocessing: {
-        invoke: {
-          src: "preprocessImages",
-          onDone: "detecting",
+        // invoke: {
+        //   src: "preprocessImages",
+        //   onDone: "detecting",
+        // },
+        /* --- remove this if service works --- */
+        on: {
+          SHUTTER_PRESSED: {
+            target: "scanning",
+            actions: [assign(() => scanModel.initialContext)],
+          },
         },
       },
       detecting: {
@@ -135,15 +147,20 @@ const scanMachine = createMachine<typeof scanModel>(
   },
   {
     delays: {
-      SHUTTER_HOLDING: 300,
-      MULTIPLE_PICTURES_DELAY: 500,
+      SHUTTER_HOLDING: 200,
+      MULTIPLE_PICTURES_DELAY: 350,
     },
   }
 );
 
 export function ScanBrick() {
   const cameraRef = useRef<Camera>(null);
-  const [state, send] = useMachine(scanMachine);
+  const [state, send, service] = useMachine(scanMachine, {
+    services: {
+      takePicture: () =>
+        cameraRef.current!.takePictureAsync().then((result) => result.uri),
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -154,19 +171,31 @@ export function ScanBrick() {
           lineAnimationDuration={1000}
           edgeBorderWidth={3}
           outerMaskOpacity={0.7}
+          showAnimatedLine={false}
           // onLayoutMeasured={(value) => console.log({layout: value})}
         ></CameraMask>
-        <Text style={styles.text}>{state.tags}</Text>
+        <View style={styles.debugContainer}>
+          <Text style={styles.text}>State: {JSON.stringify(state.value)}</Text>
+          <Text style={styles.text}>
+            Picture Uris:{" "}
+            {JSON.stringify(
+              state.context.uris.map((uri) => uri.split("/").pop()),
+              null,
+              2
+            )}
+          </Text>
+        </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
             onPressIn={() => send("SHUTTER_PRESSED")}
             onPressOut={() => send("SHUTTER_RELEASED")}
-            onPress={() => cameraRef.current?.pausePreview()}
+            // onPress={() => cameraRef.current?.pausePreview()}
           >
             <View style={styles.shutterButton}></View>
           </TouchableOpacity>
+          {/* <Button title="Reset" onPress={() => send("RESTART")}></Button> */}
         </View>
       </Camera>
     </View>
@@ -187,6 +216,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     margin: 20,
+  },
+  debugContainer: {
+    position: "absolute",
+    flex: 1,
   },
   button: {
     flex: 0.1,
