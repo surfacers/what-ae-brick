@@ -1,7 +1,14 @@
 import React, { useRef } from "react";
 import { assign, createMachine } from "xstate";
 import { createModel } from "xstate/lib/model";
-import { StyleSheet, TouchableOpacity, View, Text, Button } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+  Button,
+  Image,
+} from "react-native";
 import { Camera } from "expo-camera";
 import CameraMask from "react-native-barcode-mask";
 import { useMachine } from "@xstate/react";
@@ -176,14 +183,23 @@ export function ScanBrick() {
         ></CameraMask>
         <View style={styles.debugContainer}>
           <Text style={styles.text}>State: {JSON.stringify(state.value)}</Text>
-          <Text style={styles.text}>
+          {/* <Text style={styles.text}>
             Picture Uris:{" "}
             {JSON.stringify(
               state.context.uris.map((uri) => uri.split("/").pop()),
               null,
               2
             )}
-          </Text>
+          </Text> */}
+          <View style={{ flex: 1, flexDirection: "row" }}>
+            {state.context.uris.map((uri) => (
+              <Image
+                key={uri.split("/").pop()}
+                style={{ width: 50, height: 50 }}
+                source={{ uri }}
+              />
+            ))}
+          </View>
         </View>
 
         <View style={styles.buttonContainer}>
