@@ -1,23 +1,25 @@
 import { RouteProp } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
+import { useMachine } from '@xstate/react';
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, Image } from 'react-native';
 
 import EditScreenInfo from '../../components/EditScreenInfo';
 import { Text, View } from '../../components/Themed';
+import { BrickInfoContext, brickInfoMachine } from '../../machines/brickInfo.machine';
 import { HistoryParamList } from '../../types';
+import BrickInfo from './BrickInfo';
 
 
 type BrickDetailScreenRouteProp = StackScreenProps<HistoryParamList, 'BrickDetailScreen'>;
 
 export default function BrickDetailScreen({route, navigation}: BrickDetailScreenRouteProp) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Detail {route.params.brickId}</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="/screens/ScanScreen.tsx" />
-    </View>
-  );
+    const [state, send] = useMachine(brickInfoMachine,{context: {partId:route.params.brickId} as BrickInfoContext});
+  return state.hasTag('loading') ? (  
+    <ActivityIndicator />
+    ) : state.hasTag('finished') ? (
+      <BrickInfo partData={state.context.partData}></BrickInfo>
+  ) : (<Text>ERROR</Text>);
 }
 
 const styles = StyleSheet.create({
@@ -27,7 +29,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: 'bold',
   },
   separator: {
@@ -35,4 +37,8 @@ const styles = StyleSheet.create({
     height: 1,
     width: '80%',
   },
+  image: {
+    width: 250,
+    height: 250,
+  }
 });

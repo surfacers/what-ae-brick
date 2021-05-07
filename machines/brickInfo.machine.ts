@@ -1,8 +1,8 @@
 import { assign, createMachine } from "xstate";
 import NetInfo from "@react-native-community/netinfo";
+import { rebrickableApi } from "../constants/Keys";
 
-const rebrickableApi = 'https://rebrickable.com/api/v3/lego'
-const key = '23062b8c5ce6051cf1be80b5a29be1a2';
+const rebrickableURL = 'https://rebrickable.com/api/v3/lego'
 
 export type DetailEvent = {type: 'RETRY_LOADING'};
 
@@ -14,7 +14,7 @@ export interface BrickInfoContext {
 };
 
 const fetchPartData = (partId: number) =>
-    fetch(`${rebrickableApi}/parts/${partId}/?key=${key}`).then((response) => response.json());
+    fetch(`${rebrickableURL}/parts/${partId}/?key=${rebrickableApi}`).then((response) => response.json());
 
 const checkConnection = () => NetInfo.fetch().then(state => {
     if(!state.isConnected) {
@@ -23,7 +23,7 @@ const checkConnection = () => NetInfo.fetch().then(state => {
     return state.isConnected;
 });
 
-const fetchColorData = (partId: number) => fetch(`${rebrickableApi}/parts/${partId}/colors/?key=${key}`).then((response) => response.json());
+const fetchColorData = (partId: number) => fetch(`${rebrickableURL}/parts/${partId}/colors/?key=${rebrickableApi}`).then((response) => response.json());
 
 const fetchOffline = fetchPartData; // TODO: implement offline capabilities
 
