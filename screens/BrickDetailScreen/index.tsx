@@ -14,20 +14,15 @@ import BrickInfo from './BrickInfo';
 type BrickDetailScreenRouteProp = StackScreenProps<HistoryParamList, 'BrickDetailScreen'>;
 
 export default function BrickDetailScreen({route, navigation}: BrickDetailScreenRouteProp) {
-    const [state, send] = useMachine(brickInfoMachine,{context: {partId:route.params.brickId} as BrickInfoContext});
+    const [state, _] = useMachine(brickInfoMachine,{context: {partId:route.params.brickId} as BrickInfoContext});
   return state.hasTag('loading') ? (  
     <ActivityIndicator />
     ) : state.hasTag('finished') ? (
-      <BrickInfo partData={state.context.partData}></BrickInfo>
+      <BrickInfo partData={state.context.partData} colorData={state.context.colorData}></BrickInfo>
   ) : (<Text>ERROR</Text>);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   title: {
     fontSize: 25,
     fontWeight: 'bold',

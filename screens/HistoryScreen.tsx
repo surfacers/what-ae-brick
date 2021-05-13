@@ -6,7 +6,6 @@ import { Button, StyleSheet } from 'react-native';
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
 import { HistoryParamList } from '../types';
-import BrickDetailScreen from './BrickDetailScreen';
 
 type historyScreenProp = StackNavigationProp<HistoryParamList, 'HistoryScreen'>;
 
@@ -17,7 +16,7 @@ export default function HistoryScreen() {
       <Text style={styles.title}>History</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="/screens/HistoryScreen.tsx" />
-      <Button title="Detail" onPress={()=> navigation.navigate('BrickDetailScreen', {brickId:3001, images:[]})}/>
+      <Button title="Detail" onPress={()=> navigation.navigate('BrickDetailScreen', {brickId: 3001 , images:[]})}/>
     </View>
   );
 }
