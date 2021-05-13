@@ -25,7 +25,6 @@ export default function ColorView(props: {
   });
 
   if (state.hasTag("finished")) {
-    console.log("finished");
     return <View style={styles.container}>
       <FlatGrid
         data={props.colorData}
