@@ -4,7 +4,7 @@ import { rebrickableApi } from "../constants/Keys";
 
 const rebrickableURL = 'https://rebrickable.com/api/v3/lego'
 
-export type DetailEvent = {type: 'RETRY_LOADING'};
+export type DetailEvent = { type: 'RETRY_LOADING' };
 
 export interface BrickInfoContext {
     images?: Array<Object>;
@@ -17,7 +17,7 @@ const fetchPartData = (partId: number) =>
     fetch(`${rebrickableURL}/parts/${partId}/?key=${rebrickableApi}`).then((response) => response.json());
 
 const checkConnection = () => NetInfo.fetch().then(state => {
-    if(!state.isConnected) {
+    if (!state.isConnected) {
         throw Error("No Connection");
     }
     return state.isConnected;
@@ -26,6 +26,7 @@ const checkConnection = () => NetInfo.fetch().then(state => {
 const fetchColorData = (partId: number) => fetch(`${rebrickableURL}/parts/${partId}/colors/?key=${rebrickableApi}`).then((response) => response.json());
 
 const fetchOffline = fetchPartData; // TODO: implement offline capabilities
+
 
 
 export const brickInfoMachine = createMachine<BrickInfoContext, DetailEvent>({
