@@ -22,8 +22,7 @@ export type DataFetchEvent<TData> =
 export enum DataFetchTag {
     loading = 'loading',
     success = 'success',
-    error = 'error',
-    empty = 'empty'
+    error = 'error'
 }
 
 export default function createDataFetchMachine<TData>() { return createMachine<
@@ -45,11 +44,6 @@ export default function createDataFetchMachine<TData>() { return createMachine<
                     src: 'fetchData',
                     onDone: [{
                         target: 'success',
-                        actions: 'assignDataToContext',
-                        cond: (_, event: any) => event.data != null && (event.data?.length ?? 0) > 0
-                    },
-                    {
-                        target: 'empty',
                         actions: 'assignDataToContext'
                     }],
                     onError: 'failure'
@@ -61,11 +55,6 @@ export default function createDataFetchMachine<TData>() { return createMachine<
                     src: 'fetchData',
                     onDone: [{
                         target: 'success',
-                        actions: 'assignDataToContext',
-                        cond: (_, event: any) => event.data != null && (event.data?.length ?? 0) > 0
-                    },
-                    {
-                        target: 'empty',
                         actions: 'assignDataToContext'
                     }],
                     onError: 'failure'
@@ -75,12 +64,6 @@ export default function createDataFetchMachine<TData>() { return createMachine<
                 tags: DataFetchTag.success,
                 on: {
                     RETRY: 'reloading'
-                }
-            },
-            empty: {
-                tags: 'empty',
-                on: {
-                    RETRY: 'loading'
                 }
             },
             failure: {

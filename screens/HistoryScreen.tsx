@@ -2,7 +2,7 @@ import { useMachine } from '@xstate/react';
 import { Body, Button, Container, Content, Header, Left, ListItem, Right, Spinner, Text, Thumbnail, Title, View } from 'native-base';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Image } from 'react-native';
 import createDataFetchMachine, { DataFetchTag } from '../machines/data-fetch.machine';
 
 interface HistoryItem {
@@ -48,21 +48,16 @@ const loadData = () => new Promise((resolve, reject) => {
     }, 1000)
 });
 
+// TODO: primary color on Spinner
 const Loading = () => (
-    // TODO: primary color on Spinner
-    <Content contentContainerStyle={ styles.container }>
+    <View style={ styles.container }>
         <Spinner color="blue" style={styles.container} />
-    </Content>
-);
-
-const EmptyList = () => (
-    <Content contentContainerStyle={ styles.container }>
-        <Text style={styles.helpText}>No scanned bricks</Text>
-    </Content>
+    </View>
 );
 
 const Error = ({ onRetry }: { onRetry: () => void }) => (
     <Content contentContainerStyle={styles.container}>
+        <Image style={ styles.image } source={require('../assets/images/error.png')}></Image>
         <Text style={styles.errorText}>Error while loading</Text>
         <Button style={{ alignSelf: 'center' }} light onPress={onRetry}>
             <Text>Retry</Text>
@@ -73,7 +68,15 @@ const Error = ({ onRetry }: { onRetry: () => void }) => (
 const Success = ({ data, loading, reload }: { data: HistoryItem[], loading: boolean, reload: () => void }) => (
     <View  style={{flex: 1}}>
         <FlatList
-            refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} />}
+            contentContainerStyle={{ flexGrow: 1 }}
+            refreshControl={
+                <RefreshControl refreshing={loading} onRefresh={reload} />}
+            ListEmptyComponent={
+                <View style={styles.container}>
+                    <Image style={ styles.image } source={require('../assets/images/empty.png')}></Image>
+                    <Text style={styles.helpText}>No scanned bricks</Text>
+                </View>
+            }
             data={data}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
@@ -111,7 +114,6 @@ export default function HistoryScreen() {
                     <Title>History</Title>
                 </Body>
             </Header>
-
             {
                 state.hasTag(DataFetchTag.success)
                     ? <Success data={state.context.data ?? []}
@@ -120,9 +122,6 @@ export default function HistoryScreen() {
                     :
                 state.hasTag(DataFetchTag.loading)
                     ? <Loading />
-                    :
-                state.hasTag(DataFetchTag.empty)
-                    ? <EmptyList />
                     :
                 state.hasTag(DataFetchTag.error)
                     ? <Error onRetry={() => send({ type: 'RETRY' })} />
@@ -133,18 +132,26 @@ export default function HistoryScreen() {
 
 const styles = StyleSheet.create({
     container: {
+        height: '100%',
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center'
     },
     helpText: {
         fontSize: 18,
+        fontWeight: 'bold',
         color: 'grey'
     },
     errorText: {
         fontSize: 18,
+        fontWeight: 'bold',
         color: 'red',
         marginBottom: 16
+    },
+    image: {
+        resizeMode: 'contain',
+        width: 300,
+        height: 300
     }
 });
 
