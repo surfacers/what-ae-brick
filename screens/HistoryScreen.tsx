@@ -13,17 +13,34 @@ interface HistoryItem {
     timeStamp: Date
 }
 
+function random(max: number) {
+return Math.floor(Math.random() * max);
+}
+
 const dataFetchMachine = createDataFetchMachine<HistoryItem>();
 // TODO: Load from SQLLite Database
 const loadData = () => new Promise((resolve, reject) => {
     setTimeout(() => {
-        const data: HistoryItem[] = [...new Array(30)].map((_, i) => ({
-            id: `${i}`,
-            brickId: '3001',
-            brickName: `item ${i + 1}`,
-            uri: 'https://cdn.rebrickable.com/media/thumbs/parts/ldraw/13/3001.png/85x85p.png',
-            timeStamp: new Date()
-        }))
+        const bricks = [
+            { id: '3001', name: 'Brick 2 x 4', colors: [13, 14, 18, 22, 25] },
+            { id: '3002', name: 'Brick 2 x 2', colors: [4, 15, 27] },
+            { id: '3003', name: 'Brick 2 x 2', colors: [4, 15, 27] },
+            { id: '3005', name: 'Brick 1 x 1', colors: [4, 15, 25, 27, 322] },
+            { id: '3666', name: 'Plate 1 x 6', colors: [4, 15, 25, 27, 322] },
+            { id: '60479', name: 'Plate 1 x 12', colors: [0, 4, 15] },
+        ]
+
+        const data: HistoryItem[] = [...new Array(30)].map((_, i) => {
+            const brick = bricks[random(bricks.length)]
+            const color = brick.colors[random(brick.colors.length)];
+            return {
+                id: `${i}`,
+                brickId: brick.id,
+                brickName: brick.name,
+                uri: `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color}/${brick.id}.png/230x230.png`,
+                timeStamp: new Date()
+            }
+        })
 
         resolve(data)
         // resolve([])
