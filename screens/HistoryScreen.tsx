@@ -1,8 +1,8 @@
 import { useMachine } from '@xstate/react';
-import { Body, Button, Container, Content, Header, Icon, Left, List, ListItem, Right, Spinner, Text, Thumbnail, Title } from 'native-base';
+import { Body, Button, Container, Content, Header, Icon, Left, List, ListItem, Right, Spinner, Text, Thumbnail, Title, View } from 'native-base';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { RefreshControl, StyleSheet } from 'react-native';
 import createDataFetchMachine, { DataFetchTag } from '../machines/data-fetch.machine';
 
 interface HistoryItem {
@@ -70,12 +70,13 @@ const Error = ({ onRetry }: { onRetry: () => void }) => (
     </Content>
 );
 
-// TODO: Lazy Loading?
-const Success = ({ data }: { data: HistoryItem[] }) => (
-    <Content>
-        <List>
-        {data.map(item =>
-            <ListItem thumbnail key={item.id}>
+const Success = ({ data, loading, reload }: { data: HistoryItem[], loading: boolean, reload: () => void }) => (
+    <View  style={{flex: 1}}>
+        <List
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} />}
+            dataArray={data}
+            renderRow={item =>
+                <ListItem thumbnail key={item.id}>
                 <Left>
                     <Thumbnail square source={{uri: item.uri}} />
                 </Left>
@@ -88,10 +89,9 @@ const Success = ({ data }: { data: HistoryItem[] }) => (
                         <Text>Details</Text>
                     </Button>
                 </Right>
-            </ListItem>
-        )}
+            </ListItem>}>
         </List>
-    </Content>
+    </View>
 );
 
 export default function HistoryScreen() {
@@ -112,13 +112,15 @@ export default function HistoryScreen() {
             </Header>
 
             {
-                state.hasTag(DataFetchTag.loading) && state.context.data == null
+                state.hasTag(DataFetchTag.success)
+                    ? <Success data={state.context.data ?? []}
+                        loading={state.hasTag(DataFetchTag.loading)}
+                        reload={() => send({ type: 'RETRY' })} />
+                    :
+                state.hasTag(DataFetchTag.loading)
                     ? <Loading />
                     :
-                state.hasTag(DataFetchTag.success) && (state.context.data?.length ?? 0) > 0
-                    ? <Success data={state.context.data ?? []} />
-                    :
-                state.hasTag(DataFetchTag.success)
+                state.hasTag(DataFetchTag.empty)
                     ? <EmptyList />
                     :
                 state.hasTag(DataFetchTag.error)

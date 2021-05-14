@@ -20,10 +20,10 @@ export type DataFetchEvent<TData> =
     };
 
 export enum DataFetchTag {
-    idle = 'idle',
     loading = 'loading',
     success = 'success',
-    error = 'error'
+    error = 'error',
+    empty = 'empty'
 }
 
 export default function createDataFetchMachine<TData>() { return createMachine<
@@ -35,7 +35,6 @@ export default function createDataFetchMachine<TData>() { return createMachine<
         initial: 'idle',
         states: {
             idle: {
-                tags: DataFetchTag.idle,
                 on: {
                     FETCH: 'loading'
                 }
@@ -44,19 +43,42 @@ export default function createDataFetchMachine<TData>() { return createMachine<
                 tags: DataFetchTag.loading,
                 invoke: {
                     src: 'fetchData',
-                    onDone: {
+                    onDone: [{
                         target: 'success',
-                        actions: 'assignDataToContext'
+                        actions: 'assignDataToContext',
+                        cond: (_, event: any) => event.data != null && (event.data?.length ?? 0) > 0
                     },
+                    {
+                        target: 'empty',
+                        actions: 'assignDataToContext'
+                    }],
                     onError: 'failure'
                 }
             },
-            // TODO:
-            // // reloading: {
-            // //     tags: ['loading', 'success']
-            // // },
+            reloading: {
+                tags: [DataFetchTag.loading, DataFetchTag.success],
+                invoke: {
+                    src: 'fetchData',
+                    onDone: [{
+                        target: 'success',
+                        actions: 'assignDataToContext',
+                        cond: (_, event: any) => event.data != null && (event.data?.length ?? 0) > 0
+                    },
+                    {
+                        target: 'empty',
+                        actions: 'assignDataToContext'
+                    }],
+                    onError: 'failure'
+                }
+            },
             success: {
                 tags: DataFetchTag.success,
+                on: {
+                    RETRY: 'reloading'
+                }
+            },
+            empty: {
+                tags: 'empty',
                 on: {
                     RETRY: 'loading'
                 }
