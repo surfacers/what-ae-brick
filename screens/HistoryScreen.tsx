@@ -1,5 +1,5 @@
 import { useMachine } from '@xstate/react';
-import { Body, Button, Container, Content, Header, Left, ListItem, Right, Spinner, Text, Thumbnail, Title, View } from 'native-base';
+import { Body, Button, Container, Content, Header, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail, Title, View } from 'native-base';
 import * as React from 'react';
 import { useEffect } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Image } from 'react-native';
@@ -65,7 +65,7 @@ const Error = ({ onRetry }: { onRetry: () => void }) => (
     </Content>
 );
 
-const Success = ({ data, loading, reload }: { data: HistoryItem[], loading: boolean, reload: () => void }) => (
+const Success = ({ data, favs, loading, reload }: { data: HistoryItem[], favs: string[], loading: boolean, reload: () => void }) => (
     <View  style={{flex: 1}}>
         <FlatList
             contentContainerStyle={{ flexGrow: 1 }}
@@ -89,9 +89,7 @@ const Success = ({ data, loading, reload }: { data: HistoryItem[], loading: bool
                     <Text note numberOfLines={1}>{item.brickId}</Text>
                 </Body>
                 <Right>
-                    <Button transparent>
-                        <Text>Details</Text>
-                    </Button>
+                    <Icon name={ favs.includes(item.brickId) ? 'star' : 'star-outline' } style={{ color: 'blue' }} />
                 </Right>
             </ListItem>)}>
         </FlatList>
@@ -117,6 +115,7 @@ export default function HistoryScreen() {
             {
                 state.hasTag(DataFetchTag.success)
                     ? <Success data={state.context.data ?? []}
+                        favs={['3001']}
                         loading={state.hasTag(DataFetchTag.loading)}
                         reload={() => send({ type: 'RETRY' })} />
                     :
