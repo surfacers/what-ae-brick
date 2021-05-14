@@ -1,8 +1,8 @@
 import { useMachine } from '@xstate/react';
-import { Body, Button, Container, Content, Header, Icon, Left, List, ListItem, Right, Spinner, Text, Thumbnail, Title, View } from 'native-base';
+import { Body, Button, Container, Content, Header, Left, ListItem, Right, Spinner, Text, Thumbnail, Title, View } from 'native-base';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { RefreshControl, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 import createDataFetchMachine, { DataFetchTag } from '../machines/data-fetch.machine';
 
 interface HistoryItem {
@@ -72,10 +72,11 @@ const Error = ({ onRetry }: { onRetry: () => void }) => (
 
 const Success = ({ data, loading, reload }: { data: HistoryItem[], loading: boolean, reload: () => void }) => (
     <View  style={{flex: 1}}>
-        <List
+        <FlatList
             refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} />}
-            dataArray={data}
-            renderRow={item =>
+            data={data}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
                 <ListItem thumbnail key={item.id}>
                 <Left>
                     <Thumbnail square source={{uri: item.uri}} />
@@ -89,8 +90,8 @@ const Success = ({ data, loading, reload }: { data: HistoryItem[], loading: bool
                         <Text>Details</Text>
                     </Button>
                 </Right>
-            </ListItem>}>
-        </List>
+            </ListItem>)}>
+        </FlatList>
     </View>
 );
 
