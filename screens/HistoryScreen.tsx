@@ -1,11 +1,9 @@
-import * as React from 'react';
-import { Image, FlatList, SafeAreaView, StatusBar, StyleSheet, ActivityIndicator, TouchableHighlight, Button } from 'react-native';
-
-import simpleDataFetchMachine, { DataFetchTag } from '../machines/data-fetch.machine';
-
-import { Text, View } from '../components/Themed';
 import { useMachine } from '@xstate/react';
-import { Ionicons } from '@expo/vector-icons';
+import { Body, Button, Container, Content, Header, Icon, Left, List, ListItem, Right, Spinner, Text, Thumbnail, Title } from 'native-base';
+import * as React from 'react';
+import { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
+import createDataFetchMachine, { DataFetchTag } from '../machines/data-fetch.machine';
 
 interface HistoryItem {
     id: string,
@@ -15,32 +13,7 @@ interface HistoryItem {
     timeStamp: Date
 }
 
-type ListItemParams = {
-    item: HistoryItem,
-    separators: any
-}
-const ListItem = ({ item, separators }: ListItemParams) => (
-    <TouchableHighlight
-        key={item.id}
-        onPress={() => { console.log('pres') }}
-        onShowUnderlay={separators.highlight}
-        onHideUnderlay={separators.unhighlight}>
-        <View style={styles.item}>
-            <Image style={styles.itemImage} source={{ uri: item.uri }} />
-            <Text style={styles.title}>{item.brickName}</Text>
-            <Ionicons size={30} name="md-chevron-forward" style={{ flex: 1, textAlign: 'right', color: 'grey', fontSize: 20 }} />
-        </View>
-    </TouchableHighlight>
-);
-const EmptyList = () => (
-    <View style={styles.container}>
-        <Image style={styles.image} source={require('../assets/images/empty-history.png')} />
-        <Text style={styles.help}>No scanned bricks</Text>
-    </View>
-);
-const ItemDivider = () => (<View style={styles.divider}></View>);
-
-const dataFetchMachine = simpleDataFetchMachine<HistoryItem>();
+const dataFetchMachine = createDataFetchMachine<HistoryItem>();
 // TODO: Load from SQLLite Database
 const loadData = () => new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -52,11 +25,57 @@ const loadData = () => new Promise((resolve, reject) => {
             timeStamp: new Date()
         }))
 
-        // resolve(data)
+        resolve(data)
         // resolve([])
-        reject('No internet connection')
+        // reject('No internet connection')
     }, 1000)
 });
+
+const Loading = () => (
+    // TODO: primary color on Spinner
+    <Content contentContainerStyle={ styles.container }>
+        <Spinner color="blue" style={styles.container} />
+    </Content>
+);
+
+const EmptyList = () => (
+    <Content contentContainerStyle={ styles.container }>
+        <Text style={styles.helpText}>No scanned bricks</Text>
+    </Content>
+);
+
+const Error = ({ onRetry }: { onRetry: () => void }) => (
+    <Content contentContainerStyle={styles.container}>
+        <Text style={styles.errorText}>Error while loading</Text>
+        <Button style={{ alignSelf: 'center' }} light onPress={onRetry}>
+            <Text>Retry</Text>
+        </Button>
+    </Content>
+);
+
+// TODO: Lazy Loading?
+const Success = ({ data }: { data: HistoryItem[] }) => (
+    <Content>
+        <List>
+        {data.map(item =>
+            <ListItem thumbnail key={item.id}>
+                <Left>
+                    <Thumbnail square source={{uri: item.uri}} />
+                </Left>
+                <Body>
+                    <Text>{item.brickName}</Text>
+                    <Text note numberOfLines={1}>{item.brickId}</Text>
+                </Body>
+                <Right>
+                    <Button transparent>
+                        <Text>Details</Text>
+                    </Button>
+                </Right>
+            </ListItem>
+        )}
+        </List>
+    </Content>
+);
 
 export default function HistoryScreen() {
     const [state, send, _] = useMachine(dataFetchMachine, {
@@ -65,36 +84,31 @@ export default function HistoryScreen() {
         }
     });
 
-    if (state.hasTag(DataFetchTag.idle)) {
-        send({ type: 'FETCH' })
-    }
+    useEffect(() => { send({ type: 'FETCH' }) }, [])
 
-    return <View style={styles.container}>{
-        state.hasTag(DataFetchTag.loading) && state.context.data == null
-            ? <ActivityIndicator size="large" color="#0000ff" />
-            :
-        state.hasTag(DataFetchTag.success) && (state.context.data?.length ?? 0) > 0
-            ? <FlatList
-                style={styles.list}
-                data={state.context.data ?? []}
-                renderItem={({ item, separators }) => ListItem({ item, separators })}
-                keyExtractor={item => item.id}
-                ItemSeparatorComponent={ItemDivider}
-                onRefresh={() => send({ type: 'RETRY' })}
-                refreshing={state.hasTag(DataFetchTag.loading)} />
-            :
-        state.hasTag(DataFetchTag.success)
-            ? EmptyList()
-            : <View>
-                <Text style={{ marginBottom: 8, color: 'red' }}>
-                    Error while loading
-                </Text>
-                <Button
-                    onPress={() => send({ type: 'RETRY' })}
-                    title="Retry" />
-            </View>
-        }
-    </View>
+    return (
+        <Container>
+            <Header>
+                <Body>
+                    <Title>History</Title>
+                </Body>
+            </Header>
+
+            {
+                state.hasTag(DataFetchTag.loading) && state.context.data == null
+                    ? <Loading />
+                    :
+                state.hasTag(DataFetchTag.success) && (state.context.data?.length ?? 0) > 0
+                    ? <Success data={state.context.data ?? []} />
+                    :
+                state.hasTag(DataFetchTag.success)
+                    ? <EmptyList />
+                    :
+                state.hasTag(DataFetchTag.error)
+                    ? <Error onRetry={() => send({ type: 'RETRY' })} />
+                    : null
+            }
+        </Container>);
 }
 
 const styles = StyleSheet.create({
@@ -103,35 +117,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-    item: {
-        width: '100%',
-        padding: 10,
-        marginVertical: 0,
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    divider: {
-        backgroundColor: '#C5C5C7',
-        height: 1,
-        marginLeft: 20
-    },
-    title: {
-        fontSize: 20,
-    },
-    image: {
-        width: 250,
-        height: 250
-    },
-    help: {
+    helpText: {
         fontSize: 18,
         color: 'grey'
     },
-    list: {
-        width: '100%'
-    },
-    itemImage: {
-        width: 40,
-        height: 40,
-        marginRight: 10
+    errorText: {
+        fontSize: 18,
+        color: 'red',
+        marginBottom: 16
     }
 });
+
