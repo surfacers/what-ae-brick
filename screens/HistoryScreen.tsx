@@ -1,8 +1,8 @@
 import { useMachine } from '@xstate/react';
-import { Body, Button, Container, Content, Header, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail, Title, View } from 'native-base';
+import { Body, Container, Header, Icon, Left, ListItem, Right, Text, Thumbnail, Title } from 'native-base';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { FlatList, RefreshControl, StyleSheet, Image } from 'react-native';
+import { Error, List, Loading } from '../components';
 import createDataFetchMachine, { DataFetchTag } from '../machines/data-fetch.machine';
 
 interface HistoryItem {
@@ -14,7 +14,7 @@ interface HistoryItem {
 }
 
 function random(max: number) {
-return Math.floor(Math.random() * max);
+    return Math.floor(Math.random() * max);
 }
 
 const dataFetchMachine = createDataFetchMachine<HistoryItem>();
@@ -48,54 +48,6 @@ const loadData = () => new Promise((resolve, reject) => {
     }, 1000)
 });
 
-// TODO: primary color on Spinner
-const Loading = () => (
-    <View style={ styles.container }>
-        <Spinner color="blue" style={styles.container} />
-    </View>
-);
-
-const Error = ({ onRetry }: { onRetry: () => void }) => (
-    <Content contentContainerStyle={styles.container}>
-        <Image style={ styles.image } source={require('../assets/images/error.png')}></Image>
-        <Text style={styles.errorText}>Error while loading</Text>
-        <Button style={{ alignSelf: 'center' }} light onPress={onRetry}>
-            <Text>Retry</Text>
-        </Button>
-    </Content>
-);
-
-const Success = ({ data, favs, loading, reload }: { data: HistoryItem[], favs: string[], loading: boolean, reload: () => void }) => (
-    <View  style={{flex: 1}}>
-        <FlatList
-            contentContainerStyle={{ flexGrow: 1 }}
-            refreshControl={
-                <RefreshControl refreshing={loading} onRefresh={reload} />}
-            ListEmptyComponent={
-                <View style={styles.container}>
-                    <Image style={ styles.image } source={require('../assets/images/empty.png')}></Image>
-                    <Text style={styles.helpText}>No scanned bricks</Text>
-                </View>
-            }
-            data={data}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-                <ListItem thumbnail key={item.id}>
-                <Left>
-                    <Thumbnail square source={{uri: item.uri}} />
-                </Left>
-                <Body>
-                    <Text>{item.brickName}</Text>
-                    <Text note numberOfLines={1}>{item.brickId}</Text>
-                </Body>
-                <Right>
-                    <Icon name={ favs.includes(item.brickId) ? 'star' : 'star-outline' } style={{ color: 'blue' }} />
-                </Right>
-            </ListItem>)}>
-        </FlatList>
-    </View>
-);
-
 export default function HistoryScreen() {
     const [state, send, _] = useMachine(dataFetchMachine, {
         services: {
@@ -105,19 +57,35 @@ export default function HistoryScreen() {
 
     useEffect(() => { send({ type: 'FETCH' }) }, [])
 
+    const favs = ['3001'] // TODO:
+
     return (
         <Container>
             <Header>
                 <Body>
-                    <Title>History</Title>
+                    <Title>Wishlist</Title>
                 </Body>
             </Header>
             {
                 state.hasTag(DataFetchTag.success)
-                    ? <Success data={state.context.data ?? []}
-                        favs={['3001']}
+                    ? <List data={state.context.data ?? []}
+                        keyExtractor={item => item.id}
                         loading={state.hasTag(DataFetchTag.loading)}
-                        reload={() => send({ type: 'RETRY' })} />
+                        reload={() => send({ type: 'RETRY' })}
+                        renderItem={({ item }) => (
+                            <ListItem thumbnail key={item.id}>
+                            <Left>
+                                <Thumbnail square source={{uri: item.uri}} />
+                            </Left>
+                            <Body>
+                                <Text>{item.brickName}</Text>
+                                <Text note numberOfLines={1}>{item.brickId}</Text>
+                            </Body>
+                            <Right>
+                                <Icon name={ favs.includes(item.brickId) ? 'star' : 'star-outline' }
+                                    style={{ color: 'blue' }} />
+                            </Right>
+                        </ListItem>)} />
                     :
                 state.hasTag(DataFetchTag.loading)
                     ? <Loading />
@@ -128,29 +96,3 @@ export default function HistoryScreen() {
             }
         </Container>);
 }
-
-const styles = StyleSheet.create({
-    container: {
-        height: '100%',
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    helpText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: 'grey'
-    },
-    errorText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: 'red',
-        marginBottom: 16
-    },
-    image: {
-        resizeMode: 'contain',
-        width: 300,
-        height: 300
-    }
-});
-
