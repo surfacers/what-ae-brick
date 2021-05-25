@@ -12,10 +12,12 @@ export type BottomTabParamList = {
   History: undefined;
   Scan: undefined;
   Wishlist: undefined;
+  BrickDetail: {brickId:number, images:Array<string>};
 };
 
 export type HistoryParamList = {
   HistoryScreen: undefined;
+  BrickDetailScreen: {brickId:number, images:Array<string>};
 };
 
 export type ScanParamList = {
@@ -26,4 +28,16 @@ export type ScanParamList = {
 
 export type WishlistParamList = {
   WishlistScreen: undefined;
+};
+
+
+export type PartColorData = {
+  color_id: number,
+  color_name: string,
+  num_sets: number,
+  num_set_parts: number,
+  part_img_url: string,
+  elements: string[],
+  rgb?: string,
+  is_trans?: boolean
 };

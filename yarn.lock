@@ -1264,6 +1264,26 @@
     xcode "^3.0.1"
     xml2js "^0.4.23"
 
+"@expo/config-plugins@1.0.30":
+  version "1.0.30"
+  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-1.0.30.tgz#5e7e7e06a6e2db1c83b809e3fea78f2d35ef8801"
+  integrity sha512-DS26sQj4uhN6AvtxyzHG9KzNr/J7NN8lHr1GBi417OSb6bJbf0E21jAvv033Abz0NpEDTVKOYpd3o7cxU1dMmw==
+  dependencies:
+    "@expo/config-types" "^40.0.0-beta.2"
+    "@expo/configure-splash-screen" "0.3.4"
+    "@expo/image-utils" "0.3.13"
+    "@expo/json-file" "8.2.29"
+    "@expo/plist" "0.0.12"
+    find-up "~5.0.0"
+    fs-extra "9.0.0"
+    getenv "^1.0.0"
+    glob "7.1.6"
+    resolve-from "^5.0.0"
+    slash "^3.0.0"
+    slugify "^1.3.4"
+    xcode "^3.0.1"
+    xml2js "^0.4.23"
+
 "@expo/config-types@^40.0.0-beta.2":
   version "40.0.0-beta.2"
   resolved "https://registry.yarnpkg.com/@expo/config-types/-/config-types-40.0.0-beta.2.tgz#4fea4ef5654d02218b02b0b3772529a9ce5b0471"
@@ -1279,6 +1299,26 @@
     "@babel/preset-env" "~7.12.13"
     "@babel/preset-typescript" "~7.12.13"
     "@expo/config-plugins" "1.0.28"
+    "@expo/config-types" "^40.0.0-beta.2"
+    "@expo/json-file" "8.2.29"
+    fs-extra "9.0.0"
+    getenv "^1.0.0"
+    glob "7.1.6"
+    require-from-string "^2.0.2"
+    resolve-from "^5.0.0"
+    semver "7.3.2"
+    slugify "^1.3.4"
+
+"@expo/config@3.3.40":
+  version "3.3.40"
+  resolved "https://registry.yarnpkg.com/@expo/config/-/config-3.3.40.tgz#5f9807826591c343801951cc4beb86a219024c2b"
+  integrity sha512-a3zl/x0BW/cey3elL8DGFuBtnTcNH3KAeYHqDxfYNk/Xj5ZqtMTWoukC8ES4WBvzt38NtMCDEEca4RiUIxS4uQ==
+  dependencies:
+    "@babel/core" "7.9.0"
+    "@babel/plugin-proposal-class-properties" "~7.12.13"
+    "@babel/preset-env" "~7.12.13"
+    "@babel/preset-typescript" "~7.12.13"
+    "@expo/config-plugins" "1.0.30"
     "@expo/config-types" "^40.0.0-beta.2"
     "@expo/json-file" "8.2.29"
     fs-extra "9.0.0"
@@ -1342,6 +1382,16 @@
     getenv "^1.0.0"
     metro-react-native-babel-transformer "^0.59.0"
 
+"@expo/metro-config@^0.1.66":
+  version "0.1.66"
+  resolved "https://registry.yarnpkg.com/@expo/metro-config/-/metro-config-0.1.66.tgz#5e9634333929ba7aee5b866b6e13eabd5ce029d2"
+  integrity sha512-v0rJYetTowzPCnGty/OkBWIBRiyR3zP0gB0Hqeq14Nm9yt1FQRnqbhl/xK5tDJ3w0UtQtY00LBllzFu8/VwgZQ==
+  dependencies:
+    "@expo/config" "3.3.40"
+    chalk "^4.1.0"
+    getenv "^1.0.0"
+    metro-react-native-babel-transformer "^0.59.0"
+
 "@expo/plist@0.0.12":
   version "0.0.12"
   resolved "https://registry.yarnpkg.com/@expo/plist/-/plist-0.0.12.tgz#59d95db7f8f3cd5427a210a0f442dc1616b270d7"
@@ -1369,6 +1419,17 @@
     lodash.omit "^4.5.0"
     lodash.pick "^4.4.0"
     lodash.template "^4.5.0"
+
+"@expo/websql@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@expo/websql/-/websql-1.0.1.tgz#fff0cf9c1baa1f70f9e1d658b7c39a420d9b10a9"
+  integrity sha1-//DPnBuqH3D54dZYt8OaQg2bEKk=
+  dependencies:
+    argsarray "^0.0.1"
+    immediate "^3.2.2"
+    noop-fn "^1.0.0"
+    pouchdb-collections "^1.0.1"
+    tiny-queue "^0.2.1"
 
 "@hapi/address@2.x.x":
   version "2.1.4"
@@ -2071,6 +2132,11 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/masked-view/-/masked-view-0.1.10.tgz#5dda643e19e587793bc2034dd9bf7398ad43d401"
   integrity sha512-rk4sWFsmtOw8oyx8SD3KSvawwaK7gRBSEIy2TAwURyGt+3TizssXP1r8nx3zY+R7v2vYYHXZ+k2/GULAT/bcaQ==
 
+"@react-native-community/netinfo@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-6.0.0.tgz#2a4d7190b508dd0c2293656c9c1aa068f6f60a71"
+  integrity sha512-Z9M8VGcF2IZVOo2x+oUStvpCW/8HjIRi4+iQCu5n+PhC7OqCQX58KYAzdBr///alIfRXiu6oMb+lK+rXQH1FvQ==
+
 "@react-native-picker/picker@^1.9.7":
   version "1.16.0"
   resolved "https://registry.yarnpkg.com/@react-native-picker/picker/-/picker-1.16.0.tgz#3e5268da892349a35c66ab7bd75e834147621e5a"
@@ -2570,6 +2636,11 @@ argparse@^1.0.7:
   integrity sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==
   dependencies:
     sprintf-js "~1.0.2"
+
+argsarray@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/argsarray/-/argsarray-0.0.1.tgz#6e7207b4ecdb39b0af88303fa5ae22bda8df61cb"
+  integrity sha1-bnIHtOzbObCviDA/pa4ivajfYcs=
 
 arr-diff@^1.0.1:
   version "1.1.0"
@@ -4073,7 +4144,7 @@ expo-error-recovery@~2.1.0:
   resolved "https://registry.yarnpkg.com/expo-error-recovery/-/expo-error-recovery-2.1.0.tgz#7baf6cabc53162cdd2b36edb20b8aa6d1cdc1107"
   integrity sha512-N5g2QKtdNntUNGQVnB/tG1jHdtJP1+kLMWDS+7ZKRcKfulm3JX/M3l460fsEtqg84n/latxPkBT0yfKw2DSq+Q==
 
-expo-file-system@~11.0.2:
+expo-file-system@^11.0.2, expo-file-system@~11.0.2:
   version "11.0.2"
   resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-11.0.2.tgz#c3f9b9c6ba25456a0d32c7a9bb38e55310d471bd"
   integrity sha512-nodNvUVa+US4N4xnj5BFw8W9ZF/qCHJVC2t45cHWrBiwkVVxz45wjE7uSHUmkMWyWT7a/7AJuL3XJfYp7h90IQ==
@@ -4109,6 +4180,14 @@ expo-splash-screen@~0.10.2:
   integrity sha512-ngelW7g5yFqk3LWbyLDDxi3LYXEfgGFCJddL/Q8S/C1pMUc5foW2j9i/q+akK8i5mjYtSx3+Bk/qbyX92QIF/w==
   dependencies:
     "@expo/configure-splash-screen" "0.3.4"
+
+expo-sqlite@^9.1.0:
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/expo-sqlite/-/expo-sqlite-9.1.0.tgz#003323479b3e342ab063e12b13ffe68c76e91af3"
+  integrity sha512-nr6rHm2GCm+MrMAuMoL0mGbGw8aIHT/UNg/zMDb2/QjFU1ZHj7c/lI+vmmQx0ObZ+NfJfu+tyW6HqxsdMnkeog==
+  dependencies:
+    "@expo/websql" "^1.0.1"
+    lodash "^4.17.15"
 
 expo-status-bar@~1.0.4:
   version "1.0.4"
@@ -4797,6 +4876,11 @@ image-size@^0.6.0:
   version "0.6.3"
   resolved "https://registry.yarnpkg.com/image-size/-/image-size-0.6.3.tgz#e7e5c65bb534bd7cdcedd6cb5166272a85f75fb2"
   integrity sha512-47xSUiQioGaB96nqtp5/q55m0aBQSQdyIloMOc/x+QVTDZLNmXE892IIDrJ0hM1A5vcNUDD5tDffkSP5lCaIIA==
+
+immediate@^3.2.2:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.3.0.tgz#1aef225517836bcdf7f2a2de2600c79ff0269266"
+  integrity sha512-HR7EVodfFUdQCTIeySw+WDRFJlPcLOJbXfwwZ7Oom6tjsvZ3bOkCDJHehQC3nxJrv7+f9XecwazynjU8e4Vw3Q==
 
 import-fresh@^2.0.0:
   version "2.0.0"
@@ -6675,6 +6759,11 @@ node-stream-zip@^1.9.1:
   resolved "https://registry.yarnpkg.com/node-stream-zip/-/node-stream-zip-1.13.3.tgz#63235337abebcef408b244b4e28f28961e6e86f0"
   integrity sha512-Vv95ug+8Jfug4AxcqNV7TeGEk2antNidj+YBOyP8SS8LTHJmjsE3d9h6L831eJtO8p7jesJ3CDtgkwmLO/wcSw==
 
+noop-fn@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/noop-fn/-/noop-fn-1.0.0.tgz#5f33d47f13d2150df93e0cb036699e982f78ffbf"
+  integrity sha1-XzPUfxPSFQ35PgywNmmemC94/78=
+
 normalize-css-color@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/normalize-css-color/-/normalize-css-color-1.0.2.tgz#02991e97cccec6623fe573afbbf0de6a1f3e9f8d"
@@ -7193,6 +7282,11 @@ posix-character-classes@^0.1.0:
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
   integrity sha1-AerA/jta9xoqbAL+q7jB/vfgDqs=
 
+pouchdb-collections@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/pouchdb-collections/-/pouchdb-collections-1.0.1.tgz#fe63a17da977611abef7cb8026cb1a9553fd8359"
+  integrity sha1-/mOhfal3YRq+98uAJssalVP9g1k=
+
 prelude-ls@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
@@ -7442,6 +7536,13 @@ react-native-screens@~3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/react-native-screens/-/react-native-screens-3.0.0.tgz#ee4c2d69abf7411603868b57214feec5e8f637fa"
   integrity sha512-35II5oxTaVp3OP8y0eLPOPpQkxG4fRKQ+dL1YSE1we5kCZFOU0l/Rn0T79HbyUu1LPwUZr6lZupPs0ULnRyMuQ==
+
+react-native-super-grid@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-super-grid/-/react-native-super-grid-4.1.1.tgz#54da8fe6d716edf1c87d158c5cc61cd449c20ab7"
+  integrity sha512-rJQI2zfnqZ409V7i/2MpdQjtfs52lfZ9lILFbIojYI428sP4XRgoqUcKjjL9sRr2w/X7eK4EjJ/RnCw/shVxxQ==
+  dependencies:
+    prop-types "^15.6.0"
 
 react-native-vector-icons@^7.0.0:
   version "7.1.0"
@@ -8530,6 +8631,11 @@ timm@^1.6.1:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/timm/-/timm-1.7.1.tgz#96bab60c7d45b5a10a8a4d0f0117c6b7e5aff76f"
   integrity sha512-IjZc9KIotudix8bMaBW6QvMuq64BrJWFs1+4V0lXwWGQZwH+LnX87doAYhem4caOEusRP9/g6jVDQmZ8XOk1nw==
+
+tiny-queue@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/tiny-queue/-/tiny-queue-0.2.1.tgz#25a67f2c6e253b2ca941977b5ef7442ef97a6046"
+  integrity sha1-JaZ/LG4lOyypQZd7XvdELvl6YEY=
 
 tinycolor2@^1.4.1:
   version "1.4.2"

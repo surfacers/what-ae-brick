@@ -2,6 +2,7 @@ import { BottomTabBarOptions, BottomTabBarProps, createBottomTabNavigator } from
 import { Button, Footer, FooterTab, Icon, Text } from 'native-base';
 import * as React from 'react';
 import useColorScheme from '../hooks/useColorScheme';
+import BrickDetailScreen from '../screens/BrickDetailScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import ScanScreen from '../screens/ScanScreen';
 import WishlistScreen from '../screens/WishlistScreen';
@@ -32,6 +33,13 @@ const footer = (props: BottomTabBarProps<BottomTabBarOptions>) => (
                 <Icon name="star" />
                 <Text>Wishlist</Text>
             </Button>
+            <Button
+                vertical
+                active={props.state.index === 3}
+                onPress={() => props.navigation.navigate("BrickDetail",  {brickId: 3001 , images:[]})}>
+                <Icon name="star" />
+                <Text>Detail</Text>
+            </Button>
         </FooterTab>
     </Footer>
 )
@@ -46,6 +54,7 @@ export default function BottomTabNavigator() {
       <BottomTab.Screen name="History" component={HistoryScreen} />
       <BottomTab.Screen name="Scan" component={ScanScreen} />
       <BottomTab.Screen name="Wishlist" component={WishlistScreen} />
+      <BottomTab.Screen name="BrickDetail" component={BrickDetailScreen} />
     </BottomTab.Navigator>
   );
 }
