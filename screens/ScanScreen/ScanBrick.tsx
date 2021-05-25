@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { assign, createMachine } from "xstate";
 import { createModel } from "xstate/lib/model";
 import {
@@ -8,11 +8,13 @@ import {
   Text,
   Button,
   Image,
+  Animated,
 } from "react-native";
 import { Camera } from "expo-camera";
 import CameraMask from "react-native-barcode-mask";
 import { useMachine } from "@xstate/react";
 import { raise } from "xstate/lib/actions";
+import MaskSvg from "./mask.svg";
 
 const scanModel = createModel(
   {
@@ -154,15 +156,42 @@ const scanMachine = createMachine<typeof scanModel>(
   },
   {
     delays: {
-      SHUTTER_HOLDING: 200,
-      MULTIPLE_PICTURES_DELAY: 350,
+      SHUTTER_HOLDING: 2000,
+      MULTIPLE_PICTURES_DELAY: 1500,
     },
   }
 );
 
+function Mask() {
+  const pulse = useRef(new Animated.Value(1)).current; // Initial value for opacity: 0
+
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1.2,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulse]);
+
+  return (
+    <Animated.View style={{ transform: [{ scale: pulse }] }}>
+      <MaskSvg width={200} height={200} />
+    </Animated.View>
+  );
+}
+
 export function ScanBrick() {
   const cameraRef = useRef<Camera>(null);
-  const [state, send, service] = useMachine(scanMachine, {
+  const [state, send] = useMachine(scanMachine, {
     services: {
       takePicture: () =>
         cameraRef.current!.takePictureAsync().then((result) => result.uri),
@@ -172,7 +201,11 @@ export function ScanBrick() {
   return (
     <View style={styles.container}>
       <Camera style={styles.camera} ref={cameraRef}>
-        <CameraMask
+        <View style={styles.maskWrapper}>
+
+        <Mask />
+        </View>
+        {/* <CameraMask
           height={200}
           width={200}
           lineAnimationDuration={1000}
@@ -180,9 +213,11 @@ export function ScanBrick() {
           outerMaskOpacity={0.7}
           showAnimatedLine={false}
           // onLayoutMeasured={(value) => console.log({layout: value})}
-        ></CameraMask>
+        ></CameraMask> */}
         <View style={styles.debugContainer}>
-          <Text style={styles.text}>State: {JSON.stringify(state.value)}</Text>
+          <Text style={styles.text}>
+            State: {JSON.stringify(state.value, null, 2)}
+          </Text>
           {/* <Text style={styles.text}>
             Picture Uris:{" "}
             {JSON.stringify(
@@ -224,6 +259,15 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  maskWrapper: {
+    flex: 1,
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 40
   },
   buttonContainer: {
     flex: 1,
