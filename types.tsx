@@ -12,6 +12,7 @@ export type BottomTabParamList = {
   History: undefined;
   Scan: undefined;
   Wishlist: undefined;
+  BrickDetail: {brickId:number, images:Array<string>};
 };
 
 export type HistoryParamList = {
