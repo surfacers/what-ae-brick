@@ -4,9 +4,11 @@
  *
  */
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackHeaderProps } from '@react-navigation/stack';
+import { Body, Title } from 'native-base';
 import * as React from 'react';
 import { ColorSchemeName } from 'react-native';
+import { Header } from 'react-native/Libraries/NewAppScreen';
 
 import NotFoundScreen from '../screens/NotFoundScreen';
 import { RootStackParamList } from '../types';
