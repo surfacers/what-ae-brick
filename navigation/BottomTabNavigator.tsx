@@ -79,7 +79,7 @@ function ScanNavigator() {
       <ScanStack.Screen
         name="ScanScreen"
         component={ScanScreen}
-        options={{ headerTitle: 'Scan' }}
+        options={{ headerTitle: 'What Æ brick?' }}
       />
     </ScanStack.Navigator>
   );
