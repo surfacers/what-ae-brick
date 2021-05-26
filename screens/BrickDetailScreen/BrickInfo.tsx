@@ -1,16 +1,14 @@
 import * as React from 'react';
-import { StyleSheet, Image, Linking, Button } from 'react-native';
-import useColorScheme from '../../hooks/useColorScheme';
+import { StyleSheet, Image, Linking } from 'react-native';
 import ColorView from './ColorView';
-import { Text, View } from '../../components/Themed';
 import { PartColorData } from '../../types';
-import Colors from '../../constants/Colors';
+import { Button, Text, H1, View } from 'native-base';
 
 
-export default function BrickDetailScreen(props: { partData: any, colorData: { results: PartColorData[] } }) {
-    const colorScheme = useColorScheme();
-    return <View style={styles.container} >
-        <Text style={styles.title}>{props.partData.name} ({props.partData.part_num})</Text>
+export default function BrickDetailView(props: { partData: any, colorData: { results: PartColorData[] } }) {
+    // const colorScheme = useColorScheme();
+    return <View>
+        <H1 style={styles.h1}>{props.partData.name} ({props.partData.part_num})</H1>
         <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <View style={styles.imageContainer}>
                 <Image style={styles.image} source={{
@@ -18,30 +16,26 @@ export default function BrickDetailScreen(props: { partData: any, colorData: { r
                 }} />
             </View>
         </View>
-        <View>
-            <View style={styles.infoContainer}>
-                <View style={styles.infoElement}>
-                    <Text style={styles.infoTitle}>{'Production'}</Text>
-                    <Text style={styles.infoSubTitle}>{`${props.partData.year_from}-${props.partData.year_to}`}</Text>
-                </View>
-                <View style={styles.infoElement}>
-                    <Text style={styles.infoTitle}>{'# Prints'}</Text>
-                    <Text style={styles.infoSubTitle}>{props.partData.prints.length}</Text>
-                </View>
+        <View style={styles.infoContainer}>
+            <View style={styles.infoElement}>
+                <Text style={styles.infoTitle}>{'Production'}</Text>
+                <Text style={styles.infoSubTitle}>{`${props.partData.year_from}-${props.partData.year_to}`}</Text>
+            </View>
+            <View style={styles.infoElement}>
+                <Text style={styles.infoTitle}>{'# Prints'}</Text>
+                <Text style={styles.infoSubTitle}>{props.partData.prints.length}</Text>
             </View>
         </View>
-        <View>
-            <View style={styles.buttonContainer}>
-                <View style={styles.infoElement}>
-                    <Button title='Go to BrickLink' color={Colors[colorScheme].buttonColor} onPress={
-                        () => Linking.openURL('https://www.bricklink.com/v2/catalog/catalogitem.page?P=' + props.partData.part_num)
-                    }></Button>
-                </View>
-                <View style={styles.infoElement}>
-                    <Button title='Go to Rebrickable' color={Colors[colorScheme].buttonColor} onPress={
-                        () => Linking.openURL(props.partData.part_url)
-                    }></Button>
-                </View>
+        <View style={styles.buttonContainer}>
+            <View style={styles.buttonElement} >
+                <Button onPress={
+                    () => Linking.openURL('https://www.bricklink.com/v2/catalog/catalogitem.page?P=' + props.partData.part_num)
+                }><Text>Go to BrickLink</Text></Button>
+            </View>
+            <View style={styles.buttonElement}>
+                <Button onPress={
+                    () => Linking.openURL(props.partData.part_url)
+                }><Text>Go to Rebrickable</Text></Button>
             </View>
         </View>
         <ColorView colorData={props.colorData.results} />
@@ -53,17 +47,17 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
     },
+    h1: {
+        flex: 1,
+        flexDirection: 'row',
+        textAlign: 'center',
+        // justifyContent:'center'
+        paddingVertical: 20
+    },
     imageContainer: {
         backgroundColor: 'white',
         padding: 10,
         borderRadius: 10,
-    },
-    title: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        marginVertical: 10,
-        alignSelf: 'center',
-        textAlign: 'center'
     },
     separator: {
         marginVertical: 30,
@@ -82,16 +76,15 @@ const styles = StyleSheet.create({
         width: '80%',
         alignSelf: 'center',
         paddingVertical: 10,
-        borderBottomColor: 'rgba(255,255,255,0.2)',
-        borderBottomWidth: 2
     },
     buttonContainer: {
         flexDirection: 'row',
         width: '80%',
         alignSelf: 'center',
-        paddingVertical: 10,
-        borderBottomColor: 'rgba(255,255,255,0.2)',
-        borderBottomWidth: 2
+        justifyContent: 'center'
+    },
+    buttonElement: {
+        paddingHorizontal: 10
     },
     infoTitle: {
         fontSize: 14,

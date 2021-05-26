@@ -7,6 +7,7 @@ import HistoryScreen from '../screens/HistoryScreen';
 import ScanScreen from '../screens/ScanScreen';
 import WishlistScreen from '../screens/WishlistScreen';
 import { BottomTabParamList } from '../types';
+import { HistoryNavigator } from './HistoryNavigator';
 
 // https://docs.nativebase.io/docs/examples/navigation/StackNavigationExample.html
 const footer = (props: BottomTabBarProps<BottomTabBarOptions>) => (
@@ -33,13 +34,13 @@ const footer = (props: BottomTabBarProps<BottomTabBarOptions>) => (
                 <Icon name="star" />
                 <Text>Wishlist</Text>
             </Button>
-            <Button
+            {/* <Button
                 vertical
                 active={props.state.index === 3}
                 onPress={() => props.navigation.navigate("BrickDetail",  {brickId: 3001 , images:[]})}>
                 <Icon name="star" />
                 <Text>Detail</Text>
-            </Button>
+            </Button> */}
         </FooterTab>
     </Footer>
 )
@@ -51,10 +52,10 @@ export default function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator tabBar={footer}>
-      <BottomTab.Screen name="History" component={HistoryScreen} />
+      <BottomTab.Screen name="History" component={HistoryNavigator} />
       <BottomTab.Screen name="Scan" component={ScanScreen} />
       <BottomTab.Screen name="Wishlist" component={WishlistScreen} />
-      <BottomTab.Screen name="BrickDetail" component={BrickDetailScreen} />
+      {/* <BottomTab.Screen name="BrickDetail" component={BrickDetailScreen} /> */}
     </BottomTab.Navigator>
   );
 }
