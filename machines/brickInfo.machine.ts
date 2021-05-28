@@ -8,12 +8,12 @@ export type DetailEvent = { type: 'RETRY_LOADING' };
 
 export interface BrickInfoContext {
     images?: Array<Object>;
-    partId: number;
+    partId: string;
     partData?: any;
     colorData?: any;
 };
 
-const fetchPartData = (partId: number) =>
+const fetchPartData = (partId: string) =>
     fetch(`${rebrickableURL}/parts/${partId}/?key=${rebrickableApi}`).then((response) => response.json());
 
 const checkConnection = () => NetInfo.fetch().then(state => {
@@ -23,7 +23,7 @@ const checkConnection = () => NetInfo.fetch().then(state => {
     return state.isConnected;
 });
 
-const fetchColorData = (partId: number) => fetch(`${rebrickableURL}/parts/${partId}/colors/?key=${rebrickableApi}`).then((response) => response.json());
+const fetchColorData = (partId: string) => fetch(`${rebrickableURL}/parts/${partId}/colors/?key=${rebrickableApi}`).then((response) => response.json());
 
 const fetchOffline = fetchPartData; // TODO: implement offline capabilities
 

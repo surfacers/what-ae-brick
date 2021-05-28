@@ -1,7 +1,9 @@
+import { useNavigation } from '@react-navigation/core';
 import { useMachine } from '@xstate/react';
 import { Body, Container, Header, Icon, Left, ListItem, Right, Text, Thumbnail, Title } from 'native-base';
 import * as React from 'react';
 import { useEffect } from 'react';
+import { TouchableHighlight } from 'react-native-gesture-handler';
 import { Error, List, Loading } from '../components';
 import createDataFetchMachine, { DataFetchTag } from '../machines/data-fetch.machine';
 
@@ -59,7 +61,10 @@ export default function HistoryScreen() {
 
     const favs = ['3001'] // TODO:
 
+    const navigation = useNavigation();
+
     return (
+        
         <Container>
             <Header>
                 <Body>
@@ -73,19 +78,21 @@ export default function HistoryScreen() {
                         loading={state.hasTag(DataFetchTag.loading)}
                         reload={() => send({ type: 'RETRY' })}
                         renderItem={({ item }) => (
-                            <ListItem thumbnail key={item.id}>
-                            <Left>
-                                <Thumbnail square source={{uri: item.uri}} />
-                            </Left>
-                            <Body>
-                                <Text>{item.brickName}</Text>
-                                <Text note numberOfLines={1}>{item.brickId}</Text>
-                            </Body>
-                            <Right>
-                                <Icon name={ favs.includes(item.brickId) ? 'star' : 'star-outline' }
-                                    style={{ color: 'blue' }} />
-                            </Right>
-                        </ListItem>)} />
+                            <TouchableHighlight onPress={() => navigation.navigate("BrickDetailScreen",  {brickId: item.brickId , images:[]})}>
+                                <ListItem thumbnail key={item.id}>
+                                <Left>
+                                    <Thumbnail square source={{uri: item.uri}} />
+                                </Left>
+                                <Body>
+                                    <Text>{item.brickName}</Text>
+                                    <Text note numberOfLines={1}>{item.brickId}</Text>
+                                </Body>
+                                <Right>
+                                    <Icon name={ favs.includes(item.brickId) ? 'star' : 'star-outline' }
+                                        style={{ color: 'blue' }} />
+                                </Right>
+                            </ListItem>
+                        </TouchableHighlight>)} />
                     :
                 state.hasTag(DataFetchTag.loading)
                     ? <Loading />

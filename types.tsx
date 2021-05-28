@@ -17,12 +17,12 @@ export type BottomTabParamList = {
 
 export type HistoryParamList = {
   HistoryScreen: undefined;
-  BrickDetailScreen: {brickId:number, images:Array<string>};
+  BrickDetailScreen: {brickId:string, images:Array<string>};
 };
 
 export type ScanParamList = {
   ScanScreen: undefined;
-  ResultScreen: { id: number; certainty: number };
+  ResultScreen: { id: string; certainty: number };
   ErrorScreen: { error: Error };
 };
 
