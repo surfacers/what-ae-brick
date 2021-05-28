@@ -1,12 +1,13 @@
 # What Æ brick?
 
 ## Preparations
-Create `Keys.ts` with your individual rebrickable API([here](https://rebrickable.com/api/)) key to have online capabilities .
-```js
+Create `Keys.ts` file in to `constants` folder with your individual [rebrickable API key](https://rebrickable.com/api/).
+
+```ts
 export const rebrickableApi = '...';
 ```
-## Development
 
+## Development
 ```sh
 yarn
 yarn start
