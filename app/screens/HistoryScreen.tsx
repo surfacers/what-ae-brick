@@ -11,8 +11,7 @@ interface HistoryItem {
     id: string,
     brickId: string,
     brickName: string,
-    uri: string,
-    timeStamp: Date
+    uri: string
 }
 
 function random(max: number) {
@@ -39,8 +38,7 @@ const loadData = () => new Promise((resolve, reject) => {
                 id: `${i}`,
                 brickId: brick.id,
                 brickName: brick.name,
-                uri: `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color}/${brick.id}.png/230x230.png`,
-                timeStamp: new Date()
+                uri: `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color}/${brick.id}.png/230x230.png`
             }
         })
 
@@ -64,7 +62,7 @@ export default function HistoryScreen() {
     const navigation = useNavigation();
 
     return (
-        
+
         <Container>
             <Header>
                 <Body>

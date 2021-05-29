@@ -5,14 +5,10 @@ import HistoryScreen from "../screens/HistoryScreen";
 import { NavigationContainer } from '@react-navigation/native';
 import { HistoryParamList } from "../types";
 
-
 const Stack = createStackNavigator<HistoryParamList>();
 export function HistoryNavigator(){
     return(
-      <Stack.Navigator 
-      screenOptions={{
-        headerShown: false
-      }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
         <Stack.Screen name="BrickDetailScreen" component={BrickDetailScreen} />
       </Stack.Navigator>
