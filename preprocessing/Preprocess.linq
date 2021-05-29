@@ -1,8 +1,27 @@
-<Query Kind="Statements" />
+<Query Kind="Statements">
+  <Connection>
+    <ID>bcd5c97b-046c-4ad6-92cf-9cde8fbc42fc</ID>
+    <NamingServiceVersion>2</NamingServiceVersion>
+    <Persist>true</Persist>
+    <Driver Assembly="CsvLINQPadDriver" PublicKeyToken="no-strong-name">CsvLINQPadDriver.CsvDataContextDriver</Driver>
+    <DisplayName>C:\dev\fh\what-ae-brick\preprocessing\rebrickable (2021-05-29 16:44:10, 12 files 23 MB)</DisplayName>
+    <DriverData>
+      <Files># Drag&amp;drop here. Use Ctrl to add files.
+# Type one file/folder per line. Wildcards ? and * are supported; **.csv searches in folder and its sub-folders.
+# Press Ctrl+Shift+V to clear, paste from clipboard and proceed.
+# Press Ctrl+Shift+Alt+V to paste from clipboard and proceed.
+
+C:\dev\fh\what-ae-brick\preprocessing\rebrickable/*.csv
+</Files>
+    </DriverData>
+  </Connection>
+  <Reference Relative="Newtonsoft.Json.dll">C:\dev\fh\what-ae-brick\preprocessing\Newtonsoft.Json.dll</Reference>
+  <Namespace>Newtonsoft.Json</Namespace>
+</Query>
 
 // Settings
 var includeCategories = new[] { "Bricks", "Plates" };
-var destDir = $"{Path.GetDirectoryName(Util.CurrentQueryPath)}/out/csv";
+var destDir = $"{Path.GetDirectoryName(Util.CurrentQueryPath)}/out";
 
 var printType = "P";
 
@@ -17,7 +36,8 @@ select new
 };
 
 colorInfos.Dump();
-Util.WriteCsv(colorInfos, $"{destDir}/colors.csv");
+//Util.WriteCsv(colorInfos, $"{destDir}/parts.csv");
+File.WriteAllTextAsync($"{destDir}/colors.json", JsonConvert.SerializeObject(colorInfos));
 
 // Part Infos
 var partInfos = 
@@ -52,8 +72,16 @@ var partInfos =
 		id = g.Key.partId,
 		name = g.Key.partName,
 		category = g.Key.category,
-		productionFrom = g.Select(g => g.set?.year).Min(),
-		productionTo = g.Select(g => g.set?.year).Max(),
+		productionFrom = g
+			.Select(g => !string.IsNullOrWhiteSpace(g.set?.year) 
+				? (int?)Convert.ToInt32(g.set?.year) 
+				: null)
+			.Min(),
+		productionTo = g
+			.Select(g => !string.IsNullOrWhiteSpace(g.set?.year) 
+				? (int?)Convert.ToInt32(g.set?.year) 
+				: null)
+			.Max(),
 		setParts = g
 			.GroupBy(g => new { g.inventory.set_num, g.color.id })
 			.Select(sets => {
@@ -76,7 +104,8 @@ var partInfos =
 	.OrderBy(p => p.name);
 	
 partInfos.Dump();
-Util.WriteCsv(partInfos, $"{destDir}/parts.csv");
+//Util.WriteCsv(partInfos, $"{destDir}/parts.csv");
+File.WriteAllTextAsync($"{destDir}/parts.json", JsonConvert.SerializeObject(partInfos));
 
 // Part Color Info
 var partColorInfos = (from inventory in inventories
@@ -109,8 +138,16 @@ var partColorInfos = (from inventory in inventories
 	{
 		partId = g.Key.partId,
 		colorId = g.Key.colorId,
-		productionFrom = g.Select(g => g.set?.year).Min(),
-		productionTo = g.Select(g => g.set?.year).Max(),
+		productionFrom = g
+			.Select(g => !string.IsNullOrWhiteSpace(g.set?.year) 
+				? (int?)Convert.ToInt32(g.set?.year) 
+				: null)
+			.Min(),
+		productionTo = g
+			.Select(g => !string.IsNullOrWhiteSpace(g.set?.year) 
+				? (int?)Convert.ToInt32(g.set?.year) 
+				: null)
+			.Max(),
 		setParts = g
 			.GroupBy(g => g.inventory.set_num)
 			.Select(sets => {
@@ -134,4 +171,5 @@ var partColorInfos = (from inventory in inventories
 	.OrderBy(m => m.partId).ThenBy(m => m.colorId);
 
 partColorInfos.Dump();
-Util.WriteCsv(partColorInfos, $"{destDir}/part-colors.csv");
+//Util.WriteCsv(partColorInfos, $"{destDir}/part-colors.csv");
+File.WriteAllTextAsync($"{destDir}/parts-colors.json", JsonConvert.SerializeObject(partColorInfos));
