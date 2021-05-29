@@ -4,10 +4,11 @@ import { fetchingMachine } from '../../machines/fetching.machine';
 import { PartColorData } from '../../types';
 import ColorTile from './ColorTile';
 import { FlatGrid } from 'react-native-super-grid';
-import { View } from '../../components/Themed';
 import { updateRGBData } from '../../model/database';
 import { sortByColor } from './ColorUtils';
 import { useMachine } from '@xstate/react';
+import { View } from 'native-base';
+import { Loading } from '../../components';
 
 
 export default function ColorView(props: {
@@ -41,12 +42,13 @@ export default function ColorView(props: {
         )}
       /></View>
   }
-  return <ActivityIndicator />
+  return <Loading />
 }
 
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // flexDirection: 'row'
   },
 });
