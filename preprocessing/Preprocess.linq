@@ -1,21 +1,4 @@
 <Query Kind="Statements">
-  <Connection>
-    <ID>bcd5c97b-046c-4ad6-92cf-9cde8fbc42fc</ID>
-    <NamingServiceVersion>2</NamingServiceVersion>
-    <Persist>true</Persist>
-    <Driver Assembly="CsvLINQPadDriver" PublicKeyToken="no-strong-name">CsvLINQPadDriver.CsvDataContextDriver</Driver>
-    <DisplayName>C:\dev\fh\what-ae-brick\preprocessing\rebrickable (2021-05-29 16:44:10, 12 files 23 MB)</DisplayName>
-    <DriverData>
-      <Files># Drag&amp;drop here. Use Ctrl to add files.
-# Type one file/folder per line. Wildcards ? and * are supported; **.csv searches in folder and its sub-folders.
-# Press Ctrl+Shift+V to clear, paste from clipboard and proceed.
-# Press Ctrl+Shift+Alt+V to paste from clipboard and proceed.
-
-C:\dev\fh\what-ae-brick\preprocessing\rebrickable/*.csv
-</Files>
-    </DriverData>
-  </Connection>
-  <Reference Relative="Newtonsoft.Json.dll">C:\dev\fh\what-ae-brick\preprocessing\Newtonsoft.Json.dll</Reference>
   <Namespace>Newtonsoft.Json</Namespace>
 </Query>
 

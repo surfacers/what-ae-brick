@@ -4,28 +4,28 @@
  */
 
 export type RootStackParamList = {
-  Root: undefined;
-  NotFound: undefined;
-};
+    Root: undefined
+    NotFound: undefined
+}
 
 export type BottomTabParamList = {
-  History: undefined;
-  Scan: undefined;
-  Wishlist: undefined;
-  BrickDetail: {brickId:number, images:Array<string>};
-};
+    History: undefined
+    Scan: undefined
+    Wishlist: undefined
+    BrickDetail: { brickId: number, images: Array<string> } // TODO: ? Was ist das für ein Array?
+}
 
 export type HistoryParamList = {
-  HistoryScreen: undefined;
-  BrickDetailScreen: {brickId:string, images:Array<string>};
-};
+    HistoryScreen: undefined
+    BrickDetailScreen: { brickId: string, images: Array<string> }
+}
 
 export type ScanParamList = {
-  ScanScreen: undefined;
-  ResultScreen: { id: string; certainty: number };
-  ErrorScreen: { error: Error };
+    ScanScreen: undefined
+    ResultScreen: { id: string; certainty: number }
+    ErrorScreen: { error: Error }
 };
 
 export type WishlistParamList = {
-  WishlistScreen: undefined;
+    WishlistScreen: undefined
 };
