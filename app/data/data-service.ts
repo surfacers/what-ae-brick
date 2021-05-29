@@ -10,6 +10,5 @@ export const fetchPart = (partId: string) => new Promise((resolve, _) => {
 
 export const fetchPartColors = (partId: string) => new Promise((resolve, _) => {
     const colors = allPartColors.filter(s => s.partId == partId)
-    console.log(colors)
     resolve(colors)
 })
