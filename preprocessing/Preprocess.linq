@@ -25,20 +25,6 @@ var destDir = $"{Path.GetDirectoryName(Util.CurrentQueryPath)}/out";
 
 var printType = "P";
 
-// Color Info
-var colorInfos = from color in colors
-select new 
-{
-	id = color.id,
-	name = color.name,
-	hex = color.rgb,
-	isTransparent = color.is_trans == "t"
-};
-
-colorInfos.Dump();
-//Util.WriteCsv(colorInfos, $"{destDir}/parts.csv");
-File.WriteAllTextAsync($"{destDir}/colors.json", JsonConvert.SerializeObject(colorInfos));
-
 // Part Infos
 var partInfos = 
 	(from inventory in inventories
@@ -138,6 +124,9 @@ var partColorInfos = (from inventory in inventories
 	{
 		partId = g.Key.partId,
 		colorId = g.Key.colorId,
+		colorName = g.Select(g => g.color.name).Distinct().First(),
+		hex = g.Select(g => g.color.rgb).Distinct().First(),
+		isTransparent = g.Select(g => g.color.is_trans == "t").Distinct().First(),
 		productionFrom = g
 			.Select(g => !string.IsNullOrWhiteSpace(g.set?.year) 
 				? (int?)Convert.ToInt32(g.set?.year) 

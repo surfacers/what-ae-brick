@@ -3,7 +3,6 @@ Preprocessing rebrickable database ([available as csv files on their website](ht
 
 ## Use preprocessed JSON data
 See `out` folder containing already transformed data from `rebrickable` csvs.
-* `colors.json`
 * `parts.json`
 * `part-colors.json`
 
