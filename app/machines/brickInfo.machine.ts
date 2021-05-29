@@ -1,33 +1,26 @@
-import { assign, createMachine } from "xstate";
 import NetInfo from "@react-native-community/netinfo";
-import { rebrickableApi } from "../constants/Keys";
-
-const rebrickableURL = 'https://rebrickable.com/api/v3/lego'
+import { assign, createMachine } from "xstate";
+import { fetchPart, fetchPartColors } from '../data/data-service';
+import { PartColorDto } from '../data/part-colors';
+import { PartDto } from '../data/parts';
 
 export type DetailEvent = { type: 'RETRY_LOADING' };
 
 export interface BrickInfoContext {
-    images?: Array<Object>;
-    partId: string;
-    partData?: any;
-    colorData?: any;
-};
-
-const fetchPartData = (partId: string) =>
-    fetch(`${rebrickableURL}/parts/${partId}/?key=${rebrickableApi}`).then((response) => response.json());
+    partId: string
+    part: PartDto
+    partColors: PartColorDto[]
+}
 
 const checkConnection = () => NetInfo.fetch().then(state => {
     if (!state.isConnected) {
         throw Error("No Connection");
     }
+
     return state.isConnected;
 });
 
-const fetchColorData = (partId: string) => fetch(`${rebrickableURL}/parts/${partId}/colors/?key=${rebrickableApi}`).then((response) => response.json());
-
-const fetchOffline = fetchPartData; // TODO: implement offline capabilities
-
-
+const fetchOffline = fetchPart;
 
 export const brickInfoMachine = createMachine<BrickInfoContext, DetailEvent>({
     id: 'brickInfo',
@@ -55,13 +48,12 @@ export const brickInfoMachine = createMachine<BrickInfoContext, DetailEvent>({
                             tags: "loading",
                             invoke: {
                                 id: 'fetchPartData',
-                                src: (context, _) => fetchPartData(context.partId),
+                                src: (context, _) => fetchPart(context.partId),
                                 onDone: {
                                     target: 'fetchColorData',
                                     actions: [
-                                        assign({
-                                            partData: (_, event) => event.data
-                                        }),]
+                                        assign({ part: (_, event) => event.data })
+                                    ]
                                 },
                                 onError: '..offline',
                             }
@@ -70,13 +62,11 @@ export const brickInfoMachine = createMachine<BrickInfoContext, DetailEvent>({
                             tags: "loading",
                             invoke: {
                                 id: 'fetchColorData',
-                                src: (context, _) => fetchColorData(context.partId),
+                                src: (context, _) => fetchPartColors(context.partId),
                                 onDone: {
                                     target: '#brickInfo.loaded',
                                     actions: [
-                                        assign({
-                                            colorData: (_, event) => event.data
-                                        })
+                                        assign({ partColors: (_, event) => event.data })
                                     ],
                                 },
                                 onError: '..offline',
@@ -87,7 +77,7 @@ export const brickInfoMachine = createMachine<BrickInfoContext, DetailEvent>({
                 offline: {
                     tags: "loading",
                     invoke: {
-                        id: 'fetchOffline',
+                        id: 'fetchOffline', // TODO: funktioniert das überhaupt? Daten werden nie assigned?
                         src: (context, _) => fetchOffline(context.partId),
                         onDone: '..loaded',
                         onError: '..loadingFailed'

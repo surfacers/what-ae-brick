@@ -1,28 +1,23 @@
 import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { PartColorData } from '../../types';
 import { Text } from '../../components/Themed';
+import { PartColorDto } from '../../data';
 import { isColorDark } from './ColorUtils';
 
-export default function ColorTile(props: { partColorData: PartColorData }) {
-    return <View style={
-        {
-            ...styles.tile,
-            backgroundColor: "#" + props.partColorData.rgb
-        }}>
-        <View style={props.partColorData.is_trans ? styles.transparancyIndicator : {}}></View>
+export default function ColorTile(props: {
+    partColor: PartColorDto
+}) {
+    return <View style={{...styles.tile, backgroundColor: "#" + props.partColor.hex }}>
+        <View style={props.partColor.isTransparent ? styles.transparancyIndicator : {}}></View>
         <Text style={{
             ...styles.text,
-            color: isColorDark(props.partColorData.rgb ?? "ffffff") ? 'white' : 'black'
-        }}>{props.partColorData.color_name}</Text></View>
+            color: isColorDark(props.partColor.hex ?? "ffffff") ? 'white' : 'black'
+        }}>{props.partColor.colorName}</Text>
+    </View>
 }
 
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-    },
     tile: {
         width: '100%',
         aspectRatio: 1,

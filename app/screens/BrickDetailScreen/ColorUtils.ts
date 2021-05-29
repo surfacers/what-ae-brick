@@ -1,3 +1,4 @@
+// TODO: put somewhere else + cleanup functions
 interface HSVColor {
     chroma: number;
     hue: number;

@@ -11,8 +11,7 @@ interface HistoryItem {
     id: string,
     brickId: string,
     brickName: string,
-    uri: string,
-    timeStamp: Date
+    uri: string
 }
 
 function random(max: number) {
@@ -39,8 +38,7 @@ const loadData = () => new Promise((resolve, reject) => {
                 id: `${i}`,
                 brickId: brick.id,
                 brickName: brick.name,
-                uri: `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color}/${brick.id}.png/230x230.png`,
-                timeStamp: new Date()
+                uri: `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color}/${brick.id}.png/230x230.png`
             }
         })
 
@@ -63,43 +61,40 @@ export default function HistoryScreen() {
 
     const navigation = useNavigation();
 
-    return (
-        
-        <Container>
-            <Header>
-                <Body>
-                    <Title>Wishlist</Title>
-                </Body>
-            </Header>
-            {
-                state.hasTag(DataFetchTag.success)
-                    ? <List data={state.context.data ?? []}
-                        keyExtractor={item => item.id}
-                        loading={state.hasTag(DataFetchTag.loading)}
-                        reload={() => send({ type: 'RETRY' })}
-                        renderItem={({ item }) => (
-                            <TouchableHighlight onPress={() => navigation.navigate("BrickDetailScreen",  {brickId: item.brickId , images:[]})}>
-                                <ListItem thumbnail key={item.id}>
-                                <Left>
-                                    <Thumbnail square source={{uri: item.uri}} />
-                                </Left>
-                                <Body>
-                                    <Text>{item.brickName}</Text>
-                                    <Text note numberOfLines={1}>{item.brickId}</Text>
-                                </Body>
-                                <Right>
-                                    <Icon name={ favs.includes(item.brickId) ? 'star' : 'star-outline' }
-                                        style={{ color: 'blue' }} />
-                                </Right>
-                            </ListItem>
-                        </TouchableHighlight>)} />
-                    :
-                state.hasTag(DataFetchTag.loading)
-                    ? <Loading />
-                    :
-                state.hasTag(DataFetchTag.error)
-                    ? <Error onRetry={() => send({ type: 'RETRY' })} />
-                    : null
-            }
-        </Container>);
+    return <Container>
+        <Header>
+            <Body>
+                <Title>Wishlist</Title>
+            </Body>
+        </Header>{
+        state.hasTag(DataFetchTag.success)
+            ? <List data={state.context.data ?? []}
+                    keyExtractor={item => item.id}
+                    loading={state.hasTag(DataFetchTag.loading)}
+                    reload={() => send({ type: 'RETRY' })}
+                    renderItem={({ item }) => (
+                    <TouchableHighlight onPress={() => navigation.navigate("BrickDetailScreen",  {brickId: item.brickId , images:[]})}>
+                        <ListItem thumbnail key={item.id}>
+                            <Left>
+                                <Thumbnail square source={{uri: item.uri}} />
+                            </Left>
+                            <Body>
+                                <Text>{item.brickName}</Text>
+                                <Text note numberOfLines={1}>{item.brickId}</Text>
+                            </Body>
+                            <Right>
+                                <Icon name={ favs.includes(item.brickId) ? 'star' : 'star-outline' }
+                                    style={{ color: 'blue' }} />
+                            </Right>
+                        </ListItem>
+                    </TouchableHighlight>)} />
+            :
+        state.hasTag(DataFetchTag.loading)
+            ? <Loading />
+            :
+        state.hasTag(DataFetchTag.error)
+            ? <Error onRetry={() => send({ type: 'RETRY' })} />
+            : null
+        }
+    </Container>
 }
