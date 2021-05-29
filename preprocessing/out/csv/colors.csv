@@ -1,0 +1,190 @@
+﻿id,name,hex,isTransparent
+-1,[Unknown],0033B2,False
+0,Black,05131D,False
+1,Blue,0055BF,False
+2,Green,237841,False
+3,Dark Turquoise,008F9B,False
+4,Red,C91A09,False
+5,Dark Pink,C870A0,False
+6,Brown,583927,False
+7,Light Gray,9BA19D,False
+8,Dark Gray,6D6E5C,False
+9,Light Blue,B4D2E3,False
+10,Bright Green,4B9F4A,False
+11,Light Turquoise,55A5AF,False
+12,Salmon,F2705E,False
+13,Pink,FC97AC,False
+14,Yellow,F2CD37,False
+15,White,FFFFFF,False
+17,Light Green,C2DAB8,False
+18,Light Yellow,FBE696,False
+19,Tan,E4CD9E,False
+20,Light Violet,C9CAE2,False
+21,Glow In Dark Opaque,D4D5C9,False
+22,Purple,81007B,False
+23,Dark Blue-Violet,2032B0,False
+25,Orange,FE8A18,False
+26,Magenta,923978,False
+27,Lime,BBE90B,False
+28,Dark Tan,958A73,False
+29,Bright Pink,E4ADC8,False
+30,Medium Lavender,AC78BA,False
+31,Lavender,E1D5ED,False
+32,Trans-Black IR Lens,635F52,True
+33,Trans-Dark Blue,0020A0,True
+34,Trans-Green,84B68D,True
+35,Trans-Bright Green,D9E4A7,True
+36,Trans-Red,C91A09,True
+40,Trans-Black,635F52,True
+41,Trans-Light Blue,AEEFEC,True
+42,Trans-Neon Green,F8F184,True
+43,Trans-Very Lt Blue,C1DFF0,True
+45,Trans-Dark Pink,DF6695,True
+46,Trans-Yellow,F5CD2F,True
+47,Trans-Clear,FCFCFC,True
+52,Trans-Purple,A5A5CB,True
+54,Trans-Neon Yellow,DAB000,True
+57,Trans-Neon Orange,FF800D,True
+60,Chrome Antique Brass,645A4C,False
+61,Chrome Blue,6C96BF,False
+62,Chrome Green,3CB371,False
+63,Chrome Pink,AA4D8E,False
+64,Chrome Black,1B2A34,False
+68,Very Light Orange,F3CF9B,False
+69,Light Purple,CD6298,False
+70,Reddish Brown,582A12,False
+71,Light Bluish Gray,A0A5A9,False
+72,Dark Bluish Gray,6C6E68,False
+73,Medium Blue,5A93DB,False
+74,Medium Green,73DCA1,False
+75,Speckle Black-Copper,05131D,False
+76,Speckle DBGray-Silver,6C6E68,False
+77,Light Pink,FECCCF,False
+78,Light Flesh,F6D7B3,False
+79,Milky White,FFFFFF,False
+80,Metallic Silver,A5A9B4,False
+81,Metallic Green,899B5F,False
+82,Metallic Gold,DBAC34,False
+84,Medium Dark Flesh,CC702A,False
+85,Dark Purple,3F3691,False
+86,Dark Flesh,7C503A,False
+89,Royal Blue,4C61DB,False
+92,Flesh,D09168,False
+100,Light Salmon,FEBABD,False
+110,Violet,4354A3,False
+112,Blue-Violet,6874CA,False
+114,Glitter Trans-Dark Pink,DF6695,True
+115,Medium Lime,C7D23C,False
+117,Glitter Trans-Clear,FFFFFF,True
+118,Aqua,B3D7D1,False
+120,Light Lime,D9E4A7,False
+125,Light Orange,F9BA61,False
+129,Glitter Trans-Purple,A5A5CB,True
+132,Speckle Black-Silver,05131D,False
+133,Speckle Black-Gold,05131D,False
+134,Copper,AE7A59,False
+135,Pearl Light Gray,9CA3A8,False
+137,Metal Blue,7988A1,False
+142,Pearl Light Gold,DCBC81,False
+143,Trans-Medium Blue,CFE2F7,True
+148,Pearl Dark Gray,575857,False
+150,Pearl Very Light Gray,ABADAC,False
+151,Very Light Bluish Gray,E6E3E0,False
+158,Yellowish Green,DFEEA5,False
+178,Flat Dark Gold,B48455,False
+179,Flat Silver,898788,False
+182,Trans-Orange,F08F1C,True
+183,Pearl White,F2F3F2,False
+191,Bright Light Orange,F8BB3D,False
+212,Bright Light Blue,9FC3E9,False
+216,Rust,B31004,False
+226,Bright Light Yellow,FFF03A,False
+230,Trans-Pink,E4ADC8,True
+232,Sky Blue,7DBFDD,False
+236,Trans-Light Purple,96709F,True
+272,Dark Blue,0A3463,False
+288,Dark Green,184632,False
+294,Glow In Dark Trans,BDC6AD,True
+297,Pearl Gold,AA7F2E,False
+308,Dark Brown,352100,False
+313,Maersk Blue,3592C3,False
+320,Dark Red,720E0F,False
+321,Dark Azure,078BC9,False
+322,Medium Azure,36AEBF,False
+323,Light Aqua,ADC3C0,False
+326,Olive Green,9B9A5A,False
+334,Chrome Gold,BBA53D,False
+335,Sand Red,D67572,False
+351,Medium Dark Pink,F785B1,False
+366,Earth Orange,FA9C1C,False
+373,Sand Purple,845E84,False
+378,Sand Green,A0BCAC,False
+379,Sand Blue,6074A1,False
+383,Chrome Silver,E0E0E0,False
+450,Fabuland Brown,B67B50,False
+462,Medium Orange,FFA70B,False
+484,Dark Orange,A95500,False
+503,Very Light Gray,E6E3DA,False
+1000,Glow in Dark White,D9D9D9,False
+1001,Medium Violet,9391E4,False
+1002,Glitter Trans-Neon Green,C0F500,True
+1003,Glitter Trans-Light Blue,68BCC5,True
+1004,Trans-Flame Yellowish Orange,FCB76D,True
+1005,Trans-Fire Yellow,FBE890,True
+1006,Trans-Light Royal Blue,B4D4F7,True
+1007,Reddish Lilac,8E5597,False
+1008,Vintage Blue,039CBD,False
+1009,Vintage Green,1E601E,False
+1010,Vintage Red,CA1F08,False
+1011,Vintage Yellow,F3C305,False
+1012,Fabuland Orange,EF9121,False
+1013,Modulex White,F4F4F4,False
+1014,Modulex Light Bluish Gray,AfB5C7,False
+1015,Modulex Light Gray,9C9C9C,False
+1016,Modulex Charcoal Gray,595D60,False
+1017,Modulex Tile Gray,6B5A5A,False
+1018,Modulex Black,4D4C52,False
+1019,Modulex Tile Brown,330000,False
+1020,Modulex Terracotta,5C5030,False
+1021,Modulex Brown,907450,False
+1022,Modulex Buff,DEC69C,False
+1023,Modulex Red,B52C20,False
+1024,Modulex Pink Red,F45C40,False
+1025,Modulex Orange,F47B30,False
+1026,Modulex Light Orange,F7AD63,False
+1027,Modulex Light Yellow,FFE371,False
+1028,Modulex Ochre Yellow,FED557,False
+1029,Modulex Lemon,BDC618,False
+1030,Modulex Pastel Green,7DB538,False
+1031,Modulex Olive Green,7C9051,False
+1032,Modulex Aqua Green,27867E,False
+1033,Modulex Teal Blue,467083,False
+1034,Modulex Tile Blue,0057A6,False
+1035,Modulex Medium Blue,61AFFF,False
+1036,Modulex Pastel Blue,68AECE,False
+1037,Modulex Violet,BD7D85,False
+1038,Modulex Pink,F785B1,False
+1039,Modulex Clear,FFFFFF,False
+1040,Modulex Foil Dark Gray,595D60,False
+1041,Modulex Foil Light Gray,9C9C9C,False
+1042,Modulex Foil Dark Green,006400,False
+1043,Modulex Foil Light Green,7DB538,False
+1044,Modulex Foil Dark Blue,0057A6,False
+1045,Modulex Foil Light Blue,68AECE,False
+1046,Modulex Foil Violet,4B0082,False
+1047,Modulex Foil Red,8B0000,False
+1048,Modulex Foil Yellow,FED557,False
+1049,Modulex Foil Orange,F7AD63,False
+1050,Coral,FF698F,False
+1051,Pastel Blue,5AC4DA,False
+1052,Glitter Trans-Orange,F08F1C,True
+1053,Trans-Blue Opal,68BCC5,True
+1054,Trans-Medium Reddish Violet Opal,CE1D9B,True
+1055,Trans-Clear Opal,FCFCFC,True
+1056,Trans-Brown Opal,583927,True
+1057,Trans-Light Bright Green,C9E788,True
+1058,Trans-Light Green,94E5AB,True
+1059,Trans-Purple Opal,8320B7,True
+1060,Trans-Green Opal,84B68D,True
+1061,Trans-Dark Blue Opal,0020A0,True
+9999,[No Color/Any Color],05131D,False
