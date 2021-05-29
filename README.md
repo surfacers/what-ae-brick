@@ -1,13 +1,8 @@
 # What Æ brick?
 
-## Preparations
-Create `Keys.ts` with your individual rebrickable API([here](https://rebrickable.com/api/)) key to have online capabilities .
-```js
-export const rebrickableApi = '...';
-```
-## Development
+## React Native App
+React Native App is developed inside app folder.
+[See app folder](/app).
 
-```sh
-yarn
-yarn start
-```
+## Data Preprocessing
+[See preproccessing folder](/preprocessing).
