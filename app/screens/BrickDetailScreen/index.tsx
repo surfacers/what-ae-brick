@@ -2,7 +2,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { useMachine } from '@xstate/react';
 import * as React from 'react';
 
-import { Body, Container, Header, Content, Title, } from 'native-base';
+import { Body, Container, Header, Content, Title, View, } from 'native-base';
 
 import { Error, Loading } from '../../components';
 import { BrickInfoContext, brickInfoMachine } from '../../machines/brickInfo.machine';
@@ -15,17 +15,17 @@ type BrickDetailScreenRouteProp = StackScreenProps<HistoryParamList, 'BrickDetai
 export default function BrickDetailScreen({ route, navigation }: BrickDetailScreenRouteProp) {
     const [state, send] = useMachine(brickInfoMachine, {
         context: {
-            partId: route.params.brickId
+            partId: route.params.partId
         }
     });
 
     return <Container >
         <Header>
             <Body>
-                <Title>{route.params.brickId}</Title>
+                <Title>{route.params.partId}</Title>
             </Body>
         </Header>
-        <Content>{
+        <View>{
             state.hasTag('loading')
                 ? <Loading />
                 :
@@ -35,6 +35,6 @@ export default function BrickDetailScreen({ route, navigation }: BrickDetailScre
                     partColors={state.context.partColors} />
                 : <Error onRetry={() => send('RETRY_LOADING')} />
         }
-        </Content>
+        </View>
     </Container>
 }
