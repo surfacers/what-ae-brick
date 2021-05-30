@@ -25,7 +25,7 @@ export default function BrickDetailScreen({ route, navigation }: BrickDetailScre
                 <Title>{route.params.partId}</Title>
             </Body>
         </Header>
-        <View>{
+        <Content>{
             state.hasTag('loading')
                 ? <Loading />
                 :
@@ -35,6 +35,6 @@ export default function BrickDetailScreen({ route, navigation }: BrickDetailScre
                     partColors={state.context.partColors} />
                 : <Error onRetry={() => send('RETRY_LOADING')} />
         }
-        </View>
+        </Content>
     </Container>
 }
