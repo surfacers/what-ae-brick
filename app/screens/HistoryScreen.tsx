@@ -4,7 +4,8 @@ import { Body, Button, Container, Header, Icon, Left, ListItem, Right, Text, Thu
 import * as React from 'react';
 import { useEffect } from 'react';
 import { Error, List, Loading } from '../components';
-import { fetchHistory, fetchFavs, saveFavs } from '../data/data-service';
+import { allParts } from '../data';
+import { fetchHistory, fetchFavs, saveFavs, HistoryItem, saveToHistory } from '../data/data-service';
 import { historyFetchMachine, HistoryFetchTag } from '../machines/history.machine';
 
 export default function HistoryScreen() {
@@ -19,18 +20,30 @@ export default function HistoryScreen() {
                     reject(error)
                 }
             }),
+            saveHistory: (context, event) => new Promise<HistoryItem[]>(async (resolve, reject) => {
+                if (event.type === 'UPDATE_HISTORY') {
+                    try {
+                        const history = await saveToHistory(event.partId)
+                        resolve(history)
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            }),
             saveFavs: (context, event) => new Promise<Set<string>>(async (resolve, reject) => {
                 if (event.type === 'UPDATE_FAV') {
                     try {
-                        let newFavs = new Set(context.favs)
-                        if (newFavs.has(event.partId)) {
-                            newFavs.delete(event.partId)
-                        } else {
-                            newFavs.add(event.partId)
-                        }
+                        setTimeout(async () => {
+                            let newFavs = new Set(context.favs)
+                            if (newFavs.has(event.partId)) {
+                                newFavs.delete(event.partId)
+                            } else {
+                                newFavs.add(event.partId)
+                            }
 
-                        newFavs = await saveFavs(newFavs)
-                        resolve(newFavs)
+                            newFavs = await saveFavs(newFavs)
+                            resolve(newFavs)
+                        }, 2000)
                     } catch (error) {
                         reject(error)
                     }
@@ -46,6 +59,10 @@ export default function HistoryScreen() {
     const navigateToDetails = (partId: string) =>
         navigation.navigate("BrickDetailScreen",  { partId: partId })
 
+    const addToHistory = () => {
+        const partId = allParts[Math.floor(Math.random() * allParts.length)].id // TODO: for testing random
+        send({ type: 'UPDATE_HISTORY', partId })
+    }
     const addToFavs = (partId: string) => send({ type: 'UPDATE_FAV', partId })
 
     return <Container>
@@ -53,6 +70,11 @@ export default function HistoryScreen() {
             <Body>
                 <Title>History</Title>
             </Body>
+            <Right>
+                <Button transparent onPress={addToHistory}>
+                    <Text>Add</Text>
+                </Button>
+            </Right>
         </Header>{
             state.hasTag(HistoryFetchTag.success)
                 ? <List data={state.context.history ?? []}

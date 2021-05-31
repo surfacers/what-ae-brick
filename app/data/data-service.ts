@@ -1,6 +1,7 @@
 import { allPartColors, PartColorDto } from './part-colors'
 import { allParts, PartDto } from './parts'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { resolveActions } from 'xstate/lib/actions';
 
 // TODO: Rename file
 
@@ -40,7 +41,41 @@ export interface HistoryItem {
     uri: string
 }
 
-export const saveHistory = (items: HistoryItem[]) => {
+function uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+export const saveToHistory = (partId: string) => new Promise<HistoryItem[]>(async (resolve, reject) => {
+    try {
+        const currentHistoryJson = await AsyncStorage.getItem('history')
+        const history: HistoryStorageItem[] = currentHistoryJson != null
+            ? JSON.parse(currentHistoryJson)
+            : []
+
+        const newHistory: HistoryStorageItem[] = [{ id: uuid(), partId}, ...history.slice(0, 5)] // TODO: length
+        await AsyncStorage.setItem('history', JSON.stringify(newHistory))
+        resolve(mapToHistoryItem(newHistory))
+    } catch (error) {
+        reject(error)
+    }
+})
+
+function mapToHistoryItem(items: HistoryStorageItem[]): HistoryItem[] {
+    return items
+        .map(i => {
+            const part = allPartsById[i.partId]
+            const color = allPartColorsById[i.partId][1].colorId // TODO
+
+            return {
+                id: i.id,
+                partId: part.id,
+                partName: part.name,
+                uri:`https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color}/${part.id}.png/230x230.png`
+            }
+        })
 }
 
 export const fetchHistory = () => new Promise<HistoryItem[]>(async (resolve, reject) => {
@@ -52,21 +87,9 @@ export const fetchHistory = () => new Promise<HistoryItem[]>(async (resolve, rej
         const json = await AsyncStorage.getItem('history')
         const items: HistoryStorageItem[] = json != null
             ? JSON.parse(json)
-            : [{ id: 'asd', partId: '3001' }, { id: '123', partId: '3002' }]; // TODO:
+            : []
 
-        const history: HistoryItem[] = items
-            .map(i => {
-                const part = allPartsById[i.partId]
-                const color = allPartColorsById[i.partId][1].colorId // TODO
-
-                return {
-                    id: i.id,
-                    partId: part.id,
-                    partName: part.name,
-                    uri:`https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color}/${part.id}.png/230x230.png`
-                }
-            })
-
+        const history = mapToHistoryItem(items)
         resolve(history)
     } catch (error) {
         reject(error)

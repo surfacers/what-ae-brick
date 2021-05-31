@@ -9,7 +9,8 @@ export interface HistoryFetchContext {
 export type HistoryFetchEvent =
     | { type: 'FETCH' }
     | { type: 'RETRY' }
-    | { type: 'UPDATE_FAV', partId: string };
+    | { type: 'UPDATE_FAV', partId: string }
+    | { type: 'UPDATE_HISTORY', partId: string };
 
 export enum HistoryFetchTag {
     loading = 'loading',
@@ -57,16 +58,28 @@ export const historyFetchMachine = createMachine<HistoryFetchContext, HistoryFet
             tags: HistoryFetchTag.success,
             on: {
                 RETRY: 'reloading',
-                UPDATE_FAV: 'saving'
+                UPDATE_FAV: 'saving_favs',
+                UPDATE_HISTORY: 'saving_history'
             }
         },
-        saving: {
-            tags: ['saving', HistoryFetchTag.success],
+        saving_favs: {
+            tags: [HistoryFetchTag.saving, HistoryFetchTag.success],
             invoke: {
                 src: 'saveFavs',
                 onDone: [{
                     target: 'success',
                     actions: 'assignFavs'
+                }],
+                onError: 'success'
+            }
+        },
+        saving_history: {
+            tags: [HistoryFetchTag.saving, HistoryFetchTag.success],
+            invoke: {
+                src: 'saveHistory',
+                onDone: [{
+                    target: 'success',
+                    actions: 'assignHistory'
                 }],
                 onError: 'success'
             }
@@ -82,7 +95,8 @@ export const historyFetchMachine = createMachine<HistoryFetchContext, HistoryFet
 {
     services: {
         fetchData: () => () => { },
-        saveFavs: () => () => { }
+        saveFavs: () => () => { },
+        saveHistory: () => () => { }
     },
     actions: {
         assignData: assign((context, event: any) => {
@@ -95,6 +109,11 @@ export const historyFetchMachine = createMachine<HistoryFetchContext, HistoryFet
         assignFavs: assign((context, event: any) => {
             return {
                 favs: event.data
+            };
+        }),
+        assignHistory: assign((context, event: any) => {
+            return {
+                history: event.data
             };
         }),
     }
