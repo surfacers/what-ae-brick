@@ -1,26 +1,25 @@
 import { assign, createMachine } from 'xstate';
-import { HistoryItem } from '../data/history.service';
+import { WishlistItem } from '../data/wishlist.service';
 
-export interface HistoryContext {
-    parts: HistoryItem[]
+export interface WishlistContext {
+    items: WishlistItem[]
     favs: Set<string>
 }
 
-export type HistoryEvent =
+export type WishlistEvent =
     | { type: 'FETCH' }
     | { type: 'RETRY' }
-    | { type: 'UPDATE_FAV', partId: string }
-    | { type: 'UPDATE_HISTORY', partId: string };
+    | { type: 'UPDATE_FAV', partId: string };
 
-export enum HistoryTag {
+export enum WishlistTag {
     loading = 'loading',
     success = 'success',
     error = 'error',
     saving = 'saving'
 }
 
-export const historyMachine = createMachine<HistoryContext, HistoryEvent>({
-    id: 'scanned-parts',
+export const wishlistMachine = createMachine<WishlistContext, WishlistEvent>({
+    id: 'wishlist',
     initial: 'idle',
     states: {
         idle: {
@@ -29,7 +28,7 @@ export const historyMachine = createMachine<HistoryContext, HistoryEvent>({
             }
         },
         loading: {
-            tags: HistoryTag.loading,
+            tags: WishlistTag.loading,
             invoke: {
                 src: 'fetchData',
                 onDone: [{
@@ -40,7 +39,7 @@ export const historyMachine = createMachine<HistoryContext, HistoryEvent>({
             }
         },
         reloading: {
-            tags: [HistoryTag.loading, HistoryTag.success],
+            tags: [WishlistTag.loading, WishlistTag.success],
             invoke: {
                 src: 'fetchData',
                 onDone: [{
@@ -51,15 +50,14 @@ export const historyMachine = createMachine<HistoryContext, HistoryEvent>({
             }
         },
         success: {
-            tags: HistoryTag.success,
+            tags: WishlistTag.success,
             on: {
                 RETRY: 'reloading',
-                UPDATE_FAV: 'saving_favs',
-                UPDATE_HISTORY: 'saving_history'
+                UPDATE_FAV: 'saving_favs'
             }
         },
         saving_favs: {
-            tags: [HistoryTag.saving, HistoryTag.success],
+            tags: [WishlistTag.saving, WishlistTag.success],
             invoke: {
                 src: 'saveFavs',
                 onDone: [{
@@ -69,19 +67,8 @@ export const historyMachine = createMachine<HistoryContext, HistoryEvent>({
                 onError: 'success'
             }
         },
-        saving_history: {
-            tags: [HistoryTag.saving, HistoryTag.success],
-            invoke: {
-                src: 'saveHistory',
-                onDone: [{
-                    target: 'success',
-                    actions: 'assignHistory'
-                }],
-                onError: 'success'
-            }
-        },
         failure: {
-            tags: HistoryTag.error,
+            tags: WishlistTag.error,
             on: {
                 RETRY: 'loading'
             }
@@ -91,13 +78,12 @@ export const historyMachine = createMachine<HistoryContext, HistoryEvent>({
 {
     services: {
         fetchData: () => () => { },
-        saveFavs: () => () => { },
-        saveHistory: () => () => { }
+        saveFavs: () => () => { }
     },
     actions: {
         assignData: assign((context, event: any) => {
             return {
-                parts: event.data.history,
+                items: event.data.items,
                 favs: event.data.favs
             };
         }),
@@ -105,11 +91,6 @@ export const historyMachine = createMachine<HistoryContext, HistoryEvent>({
             return {
                 favs: event.data
             };
-        }),
-        assignHistory: assign((context, event: any) => {
-            return {
-                parts: event.data
-            };
-        }),
+        })
     }
 })

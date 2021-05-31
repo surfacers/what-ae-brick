@@ -4,42 +4,15 @@ import { Body, Button, Container, Header, Icon, Left, ListItem, Right, Text, Thu
 import * as React from 'react';
 import { useEffect } from 'react';
 import { Error, List, Loading } from '../components';
-import { allParts } from '../data/parts.data';
-import { HistoryItem, fetchHistory, saveToHistory } from '../data/history.service'
-import { fetchFavs, saveFavs } from '../data/favs.service';
-import { historyFetchMachine, HistoryFetchTag } from '../machines/history.machine';
+import { addPartToFavs } from '../data/favs.service';
+import { fetchWishlist } from '../data/wishlist.service';
+import { wishlistMachine, WishlistTag } from '../machines/wishlist.machine';
 
 export default function WishlistScreen() {
-    const [state, send, _] = useMachine(historyFetchMachine, {
+    const [state, send, _] = useMachine(wishlistMachine, {
         services: {
-            fetchData: () => new Promise(async (resolve, reject) => {
-                try {
-                    const history = await fetchHistory()
-                    const favs = await fetchFavs()
-                    resolve({ history, favs })
-                } catch (error) {
-                    reject(error)
-                }
-            }),
-            saveFavs: (context, event) => new Promise<Set<string>>(async (resolve, reject) => {
-                if (event.type === 'UPDATE_FAV') {
-                    try {
-                        setTimeout(async () => {
-                            let newFavs = new Set(context.favs)
-                            if (newFavs.has(event.partId)) {
-                                newFavs.delete(event.partId)
-                            } else {
-                                newFavs.add(event.partId)
-                            }
-
-                            newFavs = await saveFavs(newFavs)
-                            resolve(newFavs)
-                        }, 2000)
-                    } catch (error) {
-                        reject(error)
-                    }
-                }
-            })
+            fetchData: () => fetchWishlist,
+            saveFavs: (context, event: any) => addPartToFavs(context.favs, event.partId)
         }
     })
     useEffect(() => {
@@ -58,10 +31,10 @@ export default function WishlistScreen() {
                 <Title>Wishlist</Title>
             </Body>
         </Header>{
-            state.hasTag(HistoryFetchTag.success)
-                ? <List data={state.context.history ?? []}
+            state.hasTag(WishlistTag.success)
+                ? <List data={state.context.items ?? []}
                         keyExtractor={item => item.id}
-                        loading={state.hasTag(HistoryFetchTag.loading)}
+                        loading={state.hasTag(WishlistTag.loading)}
                         reload={() => send({ type: 'RETRY' })}
                         renderItem={({ item }) => (
                             <ListItem thumbnail key={item.id} onPress={() => navigateToDetails(item.partId)}>
@@ -75,17 +48,17 @@ export default function WishlistScreen() {
                                 <Right>
                                     <Button transparent
                                             onPress={() => addToFavs(item.partId)}
-                                            disabled={state.hasTag(HistoryFetchTag.saving)}>
+                                            disabled={state.hasTag(WishlistTag.saving)}>
                                         <Icon name={ state.context.favs.has(item.partId) ? 'star' : 'star-outline' }/>
                                     </Button>
                                 </Right>
                             </ListItem>
                         )}/>
                 :
-            state.hasTag(HistoryFetchTag.loading)
+            state.hasTag(WishlistTag.loading)
                 ? <Loading />
                 :
-            state.hasTag(HistoryFetchTag.error)
+            state.hasTag(WishlistTag.error)
                 ? <Error onRetry={() => send({ type: 'RETRY' })} />
                 : null
         }</Container>

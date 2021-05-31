@@ -6,7 +6,7 @@ const storageKey = 'history'
 const maxHistoryLength = 5 // TODO: adjust length
 
 interface HistoryStorageItem {
-    id: string
+    id: string // TODO: remove?
     partId: string
 }
 
@@ -14,7 +14,7 @@ export interface HistoryItem {
     id: string
     partId: string
     partName: string
-    uri: string
+    uri: string // TODO: remove?
 }
 
 export const saveToHistory = (partId: string) => new Promise<HistoryItem[]>(async (resolve, reject) => {
