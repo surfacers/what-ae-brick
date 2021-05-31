@@ -20,6 +20,7 @@ import WebView from "react-native-webview";
 const scanModel = createModel(
   {
     images: [] as string[],
+    processedImages: [] as string[],
   },
   {
     events: {
@@ -27,6 +28,7 @@ const scanModel = createModel(
       SHUTTER_RELEASED: () => ({}),
       SHUTTER_CANCELED: () => ({}),
       TAKE_PICTURE: () => ({}),
+      IMAGE_PREPROCESSED: (data: string) => ({ data }),
       RESTART: () => ({}),
     },
   }
@@ -122,17 +124,37 @@ const scanMachine = createMachine<typeof scanModel>(
         onDone: "preprocessing",
       },
       preprocessing: {
-        invoke: {
-          src: "preprocessImages",
-          onDone: "detecting",
+        initial: "processImage",
+        states: {
+          processImage: {
+            entry: ["preprocessImage"],
+            on: {
+              IMAGE_PREPROCESSED: {
+                target: "imageProcessed",
+                actions: [
+                  assign({
+                    processedImages: ({ processedImages }, { data: image }) => [...processedImages, image],
+                  })
+                ]
+              }
+            }
+          },
+          imageProcessed: {
+            always: [{
+              target: "completed",
+              cond: ({ images, processedImages }) => images.length === processedImages.length
+            },
+            {
+              target: "processImage"
+            }],
+          },
+          completed: {
+            type: "final"
+          }
         },
-        /* --- remove this if service works --- */
-        // on: {
-        //   SHUTTER_PRESSED: {
-        //     target: "scanning",
-        //     actions: [assign(() => scanModel.initialContext)],
-        //   },
-        // },
+        onDone: {
+          target: "detecting"
+        },
       },
       detecting: {
         invoke: {
@@ -196,18 +218,17 @@ export function ScanBrick() {
   const cameraRef = useRef<Camera>(null);
   const webviewRef = useRef<WebView>(null);
   const [state, send] = useMachine(scanMachine, {
+    actions: {
+      preprocessImage: ({ images, processedImages }) => {
+        const image = images[processedImages.length]
+        webviewRef.current!.injectJavaScript(`preprocess("${image}")`)
+        console.log("preprocessImage")
+      },
+    },
     services: {
       takePicture: () =>
-        cameraRef.current!.takePictureAsync({base64: true, quality: 0}).then((result) => {
-          // console.log(Object.keys(result))
-          return "data:image/jpg;base64," + result.base64;
-        }),
-      preprocessImages: (context) => {
-        const image = context.images[0]
-        webviewRef.current!.injectJavaScript(`preprocess("${image}")`)
-
-        return Promise.resolve(image)
-      },
+        cameraRef.current!.takePictureAsync({ base64: true, quality: 0 }).then(
+          (result) => "data:image/jpg;base64," + result.base64),
       detectBrick: (context) => {
         return Promise.resolve()
       }
@@ -236,10 +257,7 @@ export function ScanBrick() {
       `}
         ref={webviewRef}
         source={opencv}
-        onMessage={(e) => {
-          const event = JSON.parse(e.nativeEvent.data)
-          console.log(event.type);
-        }}
+        onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
         style={{ marginTop: 20 }}
       />
       <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium">
@@ -268,6 +286,7 @@ export function ScanBrick() {
               2
             )}
           </Text> */}
+          <Text>{state.context.processedImages.length}</Text>
           <View style={{ flex: 1, flexDirection: "row" }}>
             {state.context.images.map((base64, index) => (
               <Image
@@ -275,7 +294,15 @@ export function ScanBrick() {
                 style={{ width: 50, height: 50 }}
                 source={{ uri: base64 }}
               />
-              // <Text key={index}>{base64.substr(0, 200)}</Text>
+            ))}
+          </View>
+          <View style={{ flex: 1, flexDirection: "row" }}>
+            {state.context.processedImages.map((base64, index) => (
+              <Image
+                key={index}
+                style={{ width: 50, height: 50 }}
+                source={{ uri: base64 }}
+              />
             ))}
           </View>
         </View>
