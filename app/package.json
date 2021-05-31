@@ -43,6 +43,7 @@
     "react-native-svg": "12.1.0",
     "react-native-svg-transformer": "^0.14.3",
     "react-native-web": "~0.13.12",
+    "react-native-webview": "11.2.3",
     "unimodules-permissions-interface": "^6.1.0",
     "xstate": "^4.19.0"
   },

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { assign, createMachine } from "xstate";
 import { createModel } from "xstate/lib/model";
 import {
@@ -15,10 +15,11 @@ import CameraMask from "react-native-barcode-mask";
 import { useMachine } from "@xstate/react";
 import { raise } from "xstate/lib/actions";
 import MaskSvg from "./mask.svg";
+import WebView from "react-native-webview";
 
 const scanModel = createModel(
   {
-    uris: [] as string[],
+    images: [] as string[],
   },
   {
     events: {
@@ -102,7 +103,7 @@ const scanMachine = createMachine<typeof scanModel>(
                     target: "idle",
                     actions: [
                       assign({
-                        uris: (context, event) => [...context.uris, event.data],
+                        images: (context, event) => [...context.images, event.data],
                       }),
                     ],
                   },
@@ -121,17 +122,17 @@ const scanMachine = createMachine<typeof scanModel>(
         onDone: "preprocessing",
       },
       preprocessing: {
-        // invoke: {
-        //   src: "preprocessImages",
-        //   onDone: "detecting",
-        // },
-        /* --- remove this if service works --- */
-        on: {
-          SHUTTER_PRESSED: {
-            target: "scanning",
-            actions: [assign(() => scanModel.initialContext)],
-          },
+        invoke: {
+          src: "preprocessImages",
+          onDone: "detecting",
         },
+        /* --- remove this if service works --- */
+        // on: {
+        //   SHUTTER_PRESSED: {
+        //     target: "scanning",
+        //     actions: [assign(() => scanModel.initialContext)],
+        //   },
+        // },
       },
       detecting: {
         invoke: {
@@ -141,15 +142,15 @@ const scanMachine = createMachine<typeof scanModel>(
         },
       },
       brick_detected: {
-        type: "final",
+        // type: "final",
         on: {
-          RESTART: "idle",
+          SHUTTER_PRESSED: "idle",
         },
       },
       brick_not_detected: {
-        type: "final",
+        // type: "final",
         on: {
-          RESTART: "idle",
+          SHUTTER_PRESSED: "idle",
         },
       },
     },
@@ -189,21 +190,62 @@ function Mask() {
   );
 }
 
+import opencv from '../../assets/webviews/opencv.html';
+
 export function ScanBrick() {
   const cameraRef = useRef<Camera>(null);
+  const webviewRef = useRef<WebView>(null);
   const [state, send] = useMachine(scanMachine, {
     services: {
       takePicture: () =>
-        cameraRef.current!.takePictureAsync().then((result) => result.uri),
+        cameraRef.current!.takePictureAsync({base64: true, quality: 0}).then((result) => {
+          // console.log(Object.keys(result))
+          return "data:image/jpg;base64," + result.base64;
+        }),
+      preprocessImages: (context) => {
+        const image = context.images[0]
+        webviewRef.current!.injectJavaScript(`preprocess("${image}")`)
+
+        return Promise.resolve(image)
+      },
+      detectBrick: (context) => {
+        return Promise.resolve()
+      }
     },
   });
 
+  // const image = `data:image/gif;base64,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`
+
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     cameraRef.current!.getSupportedRatiosAsync().then(console.log)
+  //     cameraRef.current!.getAvailablePictureSizesAsync("1:1").then(console.log)
+  //   }, 3000);
+  // })
+
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} ref={cameraRef}>
+      <WebView
+        injectedJavaScriptBeforeContentLoaded={`
+        window.onerror = function(message, sourcefile, lineno, colno, error) {
+          alert("Message: " + message + " - Source: " + sourcefile + " Line: " + lineno + ":" + colno);
+          return true;
+        };
+        true;
+      `}
+        ref={webviewRef}
+        source={opencv}
+        onMessage={(e) => {
+          const event = JSON.parse(e.nativeEvent.data)
+          console.log(event.type);
+        }}
+        style={{ marginTop: 20 }}
+      />
+      <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium">
         <View style={styles.maskWrapper}>
 
-        <Mask />
+          <Mask />
         </View>
         {/* <CameraMask
           height={200}
@@ -227,12 +269,13 @@ export function ScanBrick() {
             )}
           </Text> */}
           <View style={{ flex: 1, flexDirection: "row" }}>
-            {state.context.uris.map((uri) => (
+            {state.context.images.map((base64, index) => (
               <Image
-                key={uri.split("/").pop()}
+                key={index}
                 style={{ width: 50, height: 50 }}
-                source={{ uri }}
+                source={{ uri: base64 }}
               />
+              // <Text key={index}>{base64.substr(0, 200)}</Text>
             ))}
           </View>
         </View>
@@ -242,7 +285,7 @@ export function ScanBrick() {
             style={styles.button}
             onPressIn={() => send("SHUTTER_PRESSED")}
             onPressOut={() => send("SHUTTER_RELEASED")}
-            // onPress={() => cameraRef.current?.pausePreview()}
+          // onPress={() => cameraRef.current?.pausePreview()}
           >
             <View style={styles.shutterButton}></View>
           </TouchableOpacity>
