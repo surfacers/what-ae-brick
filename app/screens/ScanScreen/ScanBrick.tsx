@@ -24,6 +24,7 @@ const scanModel = createModel(
   },
   {
     events: {
+      OPENCV_RUNTIME_INITIALIZED: () => ({}),
       SHUTTER_PRESSED: () => ({}),
       SHUTTER_RELEASED: () => ({}),
       SHUTTER_CANCELED: () => ({}),
@@ -37,145 +38,169 @@ const scanModel = createModel(
 const scanMachine = createMachine<typeof scanModel>(
   {
     id: "scan",
-    initial: "idle",
+    type: "parallel",
     context: scanModel.initialContext,
     states: {
-      idle: {
-        entry: [assign(() => scanModel.initialContext)],
-        on: {
-          SHUTTER_PRESSED: "scanning",
-        },
-      },
-      scanning: {
-        on: {
-          SHUTTER_CANCELED: "idle",
-        },
-        initial: "first",
-        type: "parallel",
+      opencv: {
+        initial: "loading",
         states: {
-          shutter: {
-            initial: "pressed",
-            states: {
-              pressed: {
-                on: {
-                  SHUTTER_RELEASED: {
-                    target: "released",
-                    actions: [raise("TAKE_PICTURE")],
-                  },
-                },
-                after: {
-                  SHUTTER_HOLDING: {
-                    target: "holding",
-                    actions: [raise("TAKE_PICTURE")],
-                  },
-                },
-              },
-              holding: {
-                on: {
-                  SHUTTER_RELEASED: {
-                    target: "released",
-                    actions: [raise("TAKE_PICTURE")],
-                  },
-                },
-                after: {
-                  MULTIPLE_PICTURES_DELAY: {
-                    target: "holding",
-                    actions: [raise("TAKE_PICTURE")],
-                  },
-                },
-              },
-              released: {
-                type: "final",
-              },
-            },
-          },
-          picture: {
-            initial: "initial",
-            states: {
-              initial: {
-                on: {
-                  TAKE_PICTURE: "taking",
-                },
-              },
-              taking: {
-                invoke: {
-                  id: "takePicture",
-                  src: "takePicture",
-                  onDone: {
-                    target: "idle",
-                    actions: [
-                      assign({
-                        images: (context, event) => [...context.images, event.data],
-                      }),
-                    ],
-                  },
-                  onError: "idle",
-                },
-              },
-              idle: {
-                type: "final",
-                on: {
-                  TAKE_PICTURE: "taking",
-                },
-              },
-            },
-          },
-        },
-        onDone: "preprocessing",
-      },
-      preprocessing: {
-        initial: "processImage",
-        states: {
-          processImage: {
-            entry: ["preprocessImage"],
+          loading: {
             on: {
-              IMAGE_PREPROCESSED: {
-                target: "imageProcessed",
-                actions: [
-                  assign({
-                    processedImages: ({ processedImages }, { data: image }) => [...processedImages, image],
-                  })
-                ]
-              }
+              OPENCV_RUNTIME_INITIALIZED: "ready"
             }
           },
-          imageProcessed: {
-            always: [{
-              target: "completed",
-              cond: ({ images, processedImages }) => images.length === processedImages.length
-            },
-            {
-              target: "processImage"
-            }],
-          },
-          completed: {
+          ready: {
             type: "final"
           }
-        },
-        onDone: {
-          target: "detecting"
-        },
+        }
       },
-      detecting: {
-        invoke: {
-          src: "detectBrick",
-          onDone: "brick_detected",
-          onError: "brick_not_detected",
+      detection: {
+        initial: "idle",
+        states: {
+          idle: {
+            entry: [assign(() => scanModel.initialContext)],
+            on: {
+              SHUTTER_PRESSED: "scanning",
+            },
+          },
+          scanning: {
+            on: {
+              SHUTTER_CANCELED: "idle",
+            },
+            initial: "first",
+            type: "parallel",
+            states: {
+              shutter: {
+                initial: "pressed",
+                states: {
+                  pressed: {
+                    on: {
+                      SHUTTER_RELEASED: {
+                        target: "released",
+                        actions: [raise("TAKE_PICTURE")],
+                      },
+                    },
+                    after: {
+                      SHUTTER_HOLDING: {
+                        target: "holding",
+                        actions: [raise("TAKE_PICTURE")],
+                      },
+                    },
+                  },
+                  holding: {
+                    on: {
+                      SHUTTER_RELEASED: {
+                        target: "released",
+                        actions: [raise("TAKE_PICTURE")],
+                      },
+                    },
+                    after: {
+                      MULTIPLE_PICTURES_DELAY: {
+                        target: "holding",
+                        actions: [raise("TAKE_PICTURE")],
+                      },
+                    },
+                  },
+                  released: {
+                    type: "final",
+                  },
+                },
+              },
+              picture: {
+                initial: "initial",
+                states: {
+                  initial: {
+                    on: {
+                      TAKE_PICTURE: "taking",
+                    },
+                  },
+                  taking: {
+                    invoke: {
+                      id: "takePicture",
+                      src: "takePicture",
+                      onDone: {
+                        target: "idle",
+                        actions: [
+                          assign({
+                            images: (context, event) => [...context.images, event.data],
+                          }),
+                        ],
+                      },
+                      onError: "idle",
+                    },
+                  },
+                  idle: {
+                    type: "final",
+                    on: {
+                      TAKE_PICTURE: "taking",
+                    },
+                  },
+                },
+              },
+            },
+            onDone: "preprocessing",
+          },
+          preprocessing: {
+            initial: "waitingForOpenCV",
+            states: {
+              waitingForOpenCV: {
+                always: {
+                  target: "processImage",
+                  in: "#scan.opencv.ready"
+                }
+              },
+              processImage: {
+                entry: ["preprocessImage"],
+                on: {
+                  IMAGE_PREPROCESSED: {
+                    target: "imageProcessed",
+                    actions: [
+                      assign({
+                        processedImages: ({ processedImages }, { data: image }) => [...processedImages, image],
+                      })
+                    ]
+                  }
+                }
+              },
+              imageProcessed: {
+                always: [{
+                  target: "completed",
+                  cond: ({ images, processedImages }) => images.length === processedImages.length
+                },
+                {
+                  target: "processImage"
+                }],
+              },
+              completed: {
+                type: "final"
+              }
+            },
+            onDone: {
+              target: "detecting"
+            },
+          },
+          detecting: {
+            invoke: {
+              src: "detectBrick",
+              onDone: "brick_detected",
+              onError: "brick_not_detected",
+            },
+          },
+          brick_detected: {
+            // type: "final",
+            on: {
+              SHUTTER_PRESSED: "idle",
+            },
+          },
+          brick_not_detected: {
+            // type: "final",
+            on: {
+              SHUTTER_PRESSED: "idle",
+            },
+          },
         },
-      },
-      brick_detected: {
-        // type: "final",
-        on: {
-          SHUTTER_PRESSED: "idle",
-        },
-      },
-      brick_not_detected: {
-        // type: "final",
-        on: {
-          SHUTTER_PRESSED: "idle",
-        },
-      },
-    },
+      }
+    }
   },
   {
     delays: {
@@ -222,7 +247,6 @@ export function ScanBrick() {
       preprocessImage: ({ images, processedImages }) => {
         const image = images[processedImages.length]
         webviewRef.current!.injectJavaScript(`preprocess("${image}")`)
-        console.log("preprocessImage")
       },
     },
     services: {
