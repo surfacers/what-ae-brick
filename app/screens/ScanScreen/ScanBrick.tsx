@@ -282,6 +282,8 @@ export function ScanBrick() {
         ref={webviewRef}
         source={opencv}
         onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
+        // containerStyle={{ position: "absolute", width: 0, height: 0 }} // <=== your prop
+        containerStyle={{ display: "none" }} // <=== your prop
         style={{ marginTop: 20 }}
       />
       <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium">
@@ -310,7 +312,7 @@ export function ScanBrick() {
               2
             )}
           </Text> */}
-          <Text>{state.context.processedImages.length}</Text>
+          {/* <Text>{state.context.processedImages.length}</Text> */}
           <View style={{ flex: 1, flexDirection: "row" }}>
             {state.context.images.map((base64, index) => (
               <Image
@@ -361,7 +363,7 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 40
+    // paddingBottom: 40
   },
   buttonContainer: {
     flex: 1,
