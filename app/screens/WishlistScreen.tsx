@@ -1,90 +1,88 @@
+import { useNavigation } from '@react-navigation/core';
 import { useMachine } from '@xstate/react';
-import { Body, Container, Header, Icon, Left, ListItem, Right, Text, Thumbnail, Title } from 'native-base';
+import { Body, Button, Container, Header, Icon, Left, ListItem, Right, Text, Thumbnail, Title } from 'native-base';
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Error, List, Loading } from '../components';
-import createDataFetchMachine, { DataFetchTag } from '../machines/data-fetch.machine';
+import { fetchHistory, HistoryItem, fetchFavs, saveFavs } from '../data/data-service';
+import { historyFetchMachine, HistoryFetchTag } from '../machines/history.machine';
 
-interface HistoryItem {
-    id: string,
-    brickId: string,
-    brickName: string,
-    uri: string,
-    timeStamp: Date
-}
-
-const dataFetchMachine = createDataFetchMachine<HistoryItem>();
-// TODO: Load from SQLLite Database
-const loadData = () => new Promise((resolve, reject) => {
-    setTimeout(() => {
-        const bricks = [
-            { id: '3001', name: 'Brick 2 x 4' },
-            { id: '3002', name: 'Brick 2 x 2' },
-            { id: '3003', name: 'Brick 2 x 2' },
-        ]
-
-        const data: HistoryItem[] = bricks.map((brick, i) => {
-            return {
-                id: `${i}`,
-                brickId: brick.id,
-                brickName: brick.name,
-                uri: `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/4/${brick.id}.png/230x230.png`,
-                timeStamp: new Date()
-            }
-        })
-
-        resolve(data)
-        // resolve([])
-        // reject('No internet connection')
-    }, 1000)
-});
-
-export default function HistoryScreen() {
-    const [state, send, _] = useMachine(dataFetchMachine, {
+export default function WishlistScreen() {
+    const navigation = useNavigation(); // TODO: make it typesafe?
+    const [state, send, _] = useMachine(historyFetchMachine, {
         services: {
-            fetchData: loadData
+            fetchData: () => new Promise(async (resolve, reject) => {
+                try {
+                    const history = await fetchHistory()
+                    const favs = await fetchFavs()
+                    resolve({ history, favs })
+                } catch (error) {
+                    reject(error)
+                }
+            }),
+            saveFavs: (context, event) => new Promise<Set<string>>(async (resolve, reject) => {
+                if (event.type === 'UPDATE_FAV') {
+                    try {
+                        let newFavs = new Set(context.favs)
+                        if (newFavs.has(event.partId)) {
+                            newFavs.delete(event.partId)
+                        } else {
+                            newFavs.add(event.partId)
+                        }
+
+                        newFavs = await saveFavs(newFavs)
+                        resolve(newFavs)
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            })
         }
-    });
+    })
+    useEffect(() => {
+        send({ type: 'FETCH' })
+    }, [])
 
-    useEffect(() => { send({ type: 'FETCH' }) }, [])
+    const navigateToDetails = (partId: string) =>
+        navigation.navigate("BrickDetailScreen",  { partId: partId })
 
-    const favs = ['3001', '3002', '3003'] // TODO:
+    const addToFavs = (partId: string) => send({ type: 'UPDATE_FAV', partId })
 
-    return (
-        <Container>
-            <Header>
-                <Body>
-                    <Title>Wishlist</Title>
-                </Body>
-            </Header>
-            {
-                state.hasTag(DataFetchTag.success)
-                    ? <List data={state.context.data ?? []}
+    return <Container>
+        <Header>
+            <Body>
+                <Title>Wishlist</Title>
+            </Body>
+        </Header>{
+            state.hasTag(HistoryFetchTag.success)
+                ? <List data={state.context.history ?? []}
                         keyExtractor={item => item.id}
-                        loading={state.hasTag(DataFetchTag.loading)}
+                        loading={state.hasTag(HistoryFetchTag.loading)}
                         reload={() => send({ type: 'RETRY' })}
                         renderItem={({ item }) => (
-                            <ListItem thumbnail key={item.id}>
-                            <Left>
-                                <Thumbnail square source={{uri: item.uri}} />
-                            </Left>
-                            <Body>
-                                <Text>{item.brickName}</Text>
-                                <Text note numberOfLines={1}>{item.brickId}</Text>
-                            </Body>
-                            <Right>
-                                <Icon name={ favs.includes(item.brickId) ? 'star' : 'star-outline' }
-                                    style={{ color: 'blue' }} />
-                            </Right>
-                        </ListItem>)} />
-                    :
-                state.hasTag(DataFetchTag.loading)
-                    ? <Loading />
-                    :
-                state.hasTag(DataFetchTag.error)
-                    ? <Error onRetry={() => send({ type: 'RETRY' })} />
-                    : null
-            }
-        </Container>);
+                            <ListItem thumbnail key={item.id} onPress={() => navigateToDetails(item.partId)}>
+                                <Left>
+                                    <Thumbnail square source={{uri: item.uri}} />
+                                </Left>
+                                <Body>
+                                    <Text>{item.partName}</Text>
+                                    <Text note numberOfLines={1}>{item.partId}</Text>
+                                </Body>
+                                <Right>
+                                    <Button transparent
+                                            onPress={() => addToFavs(item.partId)}
+                                            disabled={state.hasTag(HistoryFetchTag.saving)}>
+                                        <Icon name={ state.context.favs.has(item.partId) ? 'star' : 'star-outline' }/>
+                                    </Button>
+                                </Right>
+                            </ListItem>
+                        )}/>
+                :
+            state.hasTag(HistoryFetchTag.loading)
+                ? <Loading />
+                :
+            state.hasTag(HistoryFetchTag.error)
+                ? <Error onRetry={() => send({ type: 'RETRY' })} />
+                : null
+        }</Container>
 }
-
