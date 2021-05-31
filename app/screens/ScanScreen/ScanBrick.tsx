@@ -14,8 +14,9 @@ import { Camera } from "expo-camera";
 import CameraMask from "react-native-barcode-mask";
 import { useMachine } from "@xstate/react";
 import { raise } from "xstate/lib/actions";
-import MaskSvg from "./mask.svg";
 import WebView from "react-native-webview";
+import MaskSvg from "./mask.svg";
+import opencv from '../../assets/webviews/opencv.html';
 
 const scanModel = createModel(
   {
@@ -237,8 +238,6 @@ function Mask() {
   );
 }
 
-import opencv from '../../assets/webviews/opencv.html';
-
 export function ScanBrick() {
   const cameraRef = useRef<Camera>(null);
   const webviewRef = useRef<WebView>(null);
@@ -272,34 +271,23 @@ export function ScanBrick() {
   return (
     <View style={styles.container}>
       <WebView
-        injectedJavaScriptBeforeContentLoaded={`
-        window.onerror = function(message, sourcefile, lineno, colno, error) {
-          alert("Message: " + message + " - Source: " + sourcefile + " Line: " + lineno + ":" + colno);
-          return true;
-        };
-        true;
-      `}
+        // injectedJavaScriptBeforeContentLoaded={`
+        //       window.onerror = function(message, sourcefile, lineno, colno, error) {
+        //         alert("Message: " + message + " - Source: " + sourcefile + " Line: " + lineno + ":" + colno);
+        //         return true;
+        //       };
+        //       true;
+        //     `}
         ref={webviewRef}
         source={opencv}
         onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
-        // containerStyle={{ position: "absolute", width: 0, height: 0 }} // <=== your prop
-        containerStyle={{ display: "none" }} // <=== your prop
-        style={{ marginTop: 20 }}
+        containerStyle={{ position: "absolute", width: 300, height: 300 }}
       />
       <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium">
         <View style={styles.maskWrapper}>
 
           <Mask />
         </View>
-        {/* <CameraMask
-          height={200}
-          width={200}
-          lineAnimationDuration={1000}
-          edgeBorderWidth={3}
-          outerMaskOpacity={0.7}
-          showAnimatedLine={false}
-          // onLayoutMeasured={(value) => console.log({layout: value})}
-        ></CameraMask> */}
         <View style={styles.debugContainer}>
           <Text style={styles.text}>
             State: {JSON.stringify(state.value, null, 2)}
@@ -312,7 +300,6 @@ export function ScanBrick() {
               2
             )}
           </Text> */}
-          {/* <Text>{state.context.processedImages.length}</Text> */}
           <View style={{ flex: 1, flexDirection: "row" }}>
             {state.context.images.map((base64, index) => (
               <Image
@@ -363,7 +350,6 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: "center",
     justifyContent: "center",
-    // paddingBottom: 40
   },
   buttonContainer: {
     flex: 1,
