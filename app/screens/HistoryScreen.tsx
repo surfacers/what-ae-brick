@@ -4,8 +4,9 @@ import { Body, Button, Container, Header, Icon, Left, ListItem, Right, Text, Thu
 import * as React from 'react';
 import { useEffect } from 'react';
 import { Error, List, Loading } from '../components';
-import { allParts } from '../data';
-import { fetchHistory, fetchFavs, saveFavs, HistoryItem, saveToHistory } from '../data/data-service';
+import { allParts } from '../data/parts.data';
+import { HistoryItem, fetchHistory, saveToHistory } from '../data/history.service'
+import { fetchFavs, saveFavs } from '../data/favs.service';
 import { historyFetchMachine, HistoryFetchTag } from '../machines/history.machine';
 
 export default function HistoryScreen() {
@@ -20,7 +21,7 @@ export default function HistoryScreen() {
                     reject(error)
                 }
             }),
-            saveHistory: (context, event) => new Promise<HistoryItem[]>(async (resolve, reject) => {
+            saveHistory: (_, event) => new Promise<HistoryItem[]>(async (resolve, reject) => {
                 if (event.type === 'UPDATE_HISTORY') {
                     try {
                         const history = await saveToHistory(event.partId)

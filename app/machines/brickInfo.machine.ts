@@ -1,8 +1,8 @@
 import NetInfo from "@react-native-community/netinfo";
 import { assign, createMachine } from "xstate";
-import { fetchPart, fetchPartColors } from '../data/data-service';
-import { PartColorDto } from '../data/part-colors';
-import { PartDto } from '../data/parts';
+import { fetchPart, fetchPartColors } from '../data/parts.service';
+import { PartColorDto } from '../data/part-colors.data';
+import { PartDto } from '../data/parts.data';
 
 export type DetailEvent = { type: 'RETRY_LOADING' };
 
