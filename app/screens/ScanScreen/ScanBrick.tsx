@@ -17,11 +17,13 @@ import { raise } from "xstate/lib/actions";
 import WebView from "react-native-webview";
 import MaskSvg from "./mask.svg";
 import opencv from '../../assets/webviews/opencv.html';
+import { predict } from "../../classification";
 
 const scanModel = createModel(
   {
     images: [] as string[],
     processedImages: [] as string[],
+    class: "",
   },
   {
     events: {
@@ -183,7 +185,14 @@ const scanMachine = createMachine<typeof scanModel>(
           detecting: {
             invoke: {
               src: "detectBrick",
-              onDone: "brick_detected",
+              onDone: {
+                target: "brick_detected",
+                actions: [
+                  assign({
+                    class: (context, event) => event.data,
+                  }),
+                ]
+              },
               onError: "brick_not_detected",
             },
           },
@@ -253,7 +262,9 @@ export function ScanBrick() {
         cameraRef.current!.takePictureAsync({ base64: true, quality: 0 }).then(
           (result) => "data:image/jpg;base64," + result.base64),
       detectBrick: (context) => {
-        return Promise.resolve()
+        console.log("detecting")
+        const image = context.processedImages[0]
+        return predict(image).then(result => result.class)
       }
     },
   });
@@ -300,6 +311,7 @@ export function ScanBrick() {
               2
             )}
           </Text> */}
+          <Text>{state.context.class}</Text>
           <View style={{ flex: 1, flexDirection: "row" }}>
             {state.context.images.map((base64, index) => (
               <Image
