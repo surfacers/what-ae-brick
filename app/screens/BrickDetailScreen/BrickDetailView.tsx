@@ -2,8 +2,11 @@ import { Button, H1, Text, View } from 'native-base';
 import * as React from 'react';
 import { Image, Linking, StyleSheet } from 'react-native';
 import { PartColorDto, PartDto } from '../../data';
-import { isColorDark, sortByColor } from './ColorUtils';
+import { isColorDark, sortByColor } from './ColorView/ColorUtils';
 import ColorView from './ColorView';
+import {predict} from '../../classification';
+import { StackActions } from '@react-navigation/routers';
+
 
 // TODO: put somewhere else
 const partImageUri = (partId: string, colorId: string) =>
@@ -12,17 +15,22 @@ const partImageUri = (partId: string, colorId: string) =>
 const openBrickLink = (partId: string) =>
     Linking.openURL(`https://www.bricklink.com/v2/catalog/catalogitem.page?P=${partId}`)
 
+const openRebrickable = (partId: string) =>
+    Linking.openURL(`https://rebrickable.com/parts/${partId}`)
+
+
 export default function BrickDetailView(props: {
     part: PartDto,
     partColors: PartColorDto[]
 }) {
-    // const colorScheme = useColorScheme();
-
+    const [state, setState] = React.useState({prediction: ""})
+    if(state.prediction === "")
+        predict(require("../../assets/test.jpg")).then((result) => setState({prediction: result.class}))
     const sortedColors = sortByColor(props.partColors, p => p.hex)
     const defaultColor = sortedColors.find(s => isColorDark(s.hex) && !s.isTransparent) || sortedColors[0]
 
     return <View>
-        <H1 style={styles.h1}>{props.part.name} ({props.part.id})</H1>
+        <H1 style={styles.h1}>{state.prediction}{props.part.name} ({props.part.id})</H1>
         <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <View style={styles.imageContainer}>
                 <Image style={styles.image} source={{ uri: partImageUri(defaultColor.partId, defaultColor.colorId)}} />
@@ -44,8 +52,7 @@ export default function BrickDetailView(props: {
             <Button style={styles.buttonElement} onPress={() => openBrickLink(props.part.id)}>
                 <Text>Go to BrickLink</Text>
             </Button>
-            {/* TODO: Adjust URL */}
-            <Button style={styles.buttonElement} onPress={() => Linking.openURL(props.part.part_url)}>
+            <Button style={styles.buttonElement} onPress={() => openRebrickable(props.part.id)}>
                 <Text>Go to Rebrickable</Text>
             </Button>
         </View>
