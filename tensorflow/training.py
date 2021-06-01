@@ -15,7 +15,7 @@ from tflite_model_maker.image_classifier import DataLoader
 import matplotlib.pyplot as plt
 
 #%% Config
-# Based on: https://www.tensorflow.org/lite/tutorials/model_maker_image_classification
+# Based on: https://codelabs.developers.google.com/tflite-computer-vision-train-model
 image_path = "D:\\GIT\\machine-learning-project\\main\\_data_224\\"
 EPOCHS = 15
 
