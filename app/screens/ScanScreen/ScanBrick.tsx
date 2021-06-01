@@ -16,14 +16,16 @@ import { useMachine } from "@xstate/react";
 import { raise } from "xstate/lib/actions";
 import WebView from "react-native-webview";
 import MaskSvg from "./mask.svg";
-import opencv from '../../assets/webviews/opencv.html';
 import { predict } from "../../classification";
+import { opencv } from './opencvweb';
+import { allParts, PartDto } from '../../data';
 
 const scanModel = createModel(
   {
     images: [] as string[],
     processedImages: [] as string[],
-    detectedBrickId: "",
+    detectedBrickId: "", // TODO: can be removed
+    detectedBrick: undefined as (PartDto | undefined)
   },
   {
     events: {
@@ -190,6 +192,7 @@ const scanMachine = createMachine<typeof scanModel>(
                 actions: [
                   assign({
                     detectedBrickId: (_, event) => event.data,
+                    detectedBrick: (_, event) => allParts.find(p => p.id == event.data)
                   }),
                 ]
               },
@@ -286,7 +289,8 @@ export function ScanBrick() {
         //       true;
         //     `}
         ref={webviewRef}
-        source={opencv}
+        originWhitelist={['*']}
+        source={{ html: opencv }}
         onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
         containerStyle={{ position: "absolute", width: 300, height: 300 }}
       />
@@ -299,7 +303,7 @@ export function ScanBrick() {
           <Text style={styles.text}>
             State: {JSON.stringify(state.value, null, 2)}
           </Text>
-          <Text>Detected: {state.context.detectedBrickId}</Text>
+          <Text style={styles.text}>Detected: {state.context.detectedBrick?.id} {state.context.detectedBrick?.name}</Text>
           <View style={{ flex: 1, flexDirection: "row" }}>
             {state.context.images.map((base64, index) => (
               <Image
