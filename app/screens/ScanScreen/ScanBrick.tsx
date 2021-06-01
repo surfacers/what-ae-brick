@@ -197,8 +197,8 @@ const scanMachine = createMachine<typeof scanModel>(
             },
           },
           brick_detected: {
-            // type: "final",
             entry: [
+              "saveBrickToHistory",
               "showDetailScreen"
             ],
             on: {
@@ -206,7 +206,6 @@ const scanMachine = createMachine<typeof scanModel>(
             },
           },
           brick_not_detected: {
-            // type: "final",
             on: {
               SHUTTER_PRESSED: "idle",
             },
@@ -259,7 +258,12 @@ export function ScanBrick() {
         const image = images[processedImages.length]
         webviewRef.current!.injectJavaScript(`preprocess("${image}")`)
       },
+      saveBrickToHistory: ({ detectedBrickId }) => {
+        // TODO
+        console.log(`TODO: save ${detectedBrickId} to history`)
+      },
       showDetailScreen: ({ detectedBrickId }) => {
+        // TODO
         console.log(`TODO: navigate to ${detectedBrickId}`)
       }
     },
