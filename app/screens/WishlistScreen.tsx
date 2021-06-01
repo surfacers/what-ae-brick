@@ -15,15 +15,23 @@ export default function WishlistScreen() {
             saveFavs: (context, event: any) => addPartToFavs(context.favs, event.partId)
         }
     })
-    useEffect(() => {
-        send({ type: 'FETCH' })
-    }, [])
 
-    const navigation = useNavigation(); // TODO: make it typesafe?
+    useEffect(() => { send({ type: 'FETCH' }) }, [])
+
+    const navigation = useNavigation()
     const navigateToDetails = (partId: string) =>
-        navigation.navigate("BrickDetailScreen",  { partId: partId })
+        navigation.navigate('BrickDetailScreen',  { partId: partId })
 
-    const addToFavs = (partId: string) => send({ type: 'UPDATE_FAV', partId })
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            send({ type: 'RETRY' })
+        });
+
+        return unsubscribe;
+        }, [navigation]);
+
+    const addToFavs = (partId: string) =>
+        send({ type: 'UPDATE_FAV', partId })
 
     return <Container>
         <Header>

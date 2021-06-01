@@ -12,12 +12,12 @@ export type BottomTabParamList = {
     History: undefined
     Scan: undefined
     Wishlist: undefined
-    BrickDetail: { partId: number, images: Array<string> } // TODO: ? Was ist das für ein Array?
+    BrickDetail: { partId: number }
 }
 
 export type HistoryParamList = {
     HistoryScreen: undefined
-    BrickDetailScreen: { partId: string, images: Array<string> }
+    BrickDetailScreen: { partId: string }
 }
 
 export type ScanParamList = {
@@ -28,4 +28,5 @@ export type ScanParamList = {
 
 export type WishlistParamList = {
     WishlistScreen: undefined
+    BrickDetailScreen: { partId: string }
 };

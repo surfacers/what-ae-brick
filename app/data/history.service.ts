@@ -3,7 +3,7 @@ import { uuid } from '../utils/uuid'
 import { allPartColorsById, allPartsById } from './parts.service'
 
 const storageKey = 'history'
-const maxHistoryLength = 5 // TODO: adjust length
+const maxHistoryLength = 100
 
 interface HistoryStorageItem {
     id: string // TODO: remove?
@@ -33,10 +33,6 @@ export const saveToHistory = (partId: string) => new Promise<HistoryItem[]>(asyn
 })
 
 export const fetchHistory = () => new Promise<HistoryItem[]>(async (resolve, reject) => {
-    // TODO: just for test:
-    // resolve([])
-    // reject('No internet connection')
-
     try {
         const json = await AsyncStorage.getItem(storageKey)
         const items: HistoryStorageItem[] = json != null

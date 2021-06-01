@@ -1,11 +1,12 @@
 import { useNavigation } from '@react-navigation/core';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useMachine } from '@xstate/react';
 import { Body, Button, Container, Header, Icon, Left, ListItem, Right, Text, Thumbnail, Title } from 'native-base';
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Error, List, Loading } from '../components';
 import { addPartToFavs, fetchFavs } from '../data/favs.service';
-import { fetchHistory, saveToHistory, HistoryItem } from '../data/history.service';
+import { fetchHistory, saveToHistory } from '../data/history.service';
 import { allParts } from '../data/parts.data';
 import { historyMachine, HistoryTag } from '../machines/history.machine';
 
@@ -25,19 +26,27 @@ export default function HistoryScreen() {
             saveFavs: (context, event: any) => addPartToFavs(context.favs, event.partId)
         }
     })
-    useEffect(() => {
-        send({ type: 'FETCH' })
-    }, [])
+    useEffect(() => { send({ type: 'FETCH' }) }, [])
 
-    const navigation = useNavigation(); // TODO: make it typesafe?
+    const navigation = useNavigation()
     const navigateToDetails = (partId: string) =>
         navigation.navigate("BrickDetailScreen",  { partId: partId })
 
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            send({ type: 'RETRY' })
+        });
+
+        return unsubscribe;
+        }, [navigation]);
+
     const addToHistory = () => {
-        const partId = allParts[Math.floor(Math.random() * allParts.length)].id // TODO: for testing random
+        // TODO: for testing random
+        const partId = allParts[Math.floor(Math.random() * allParts.length)].id
         send({ type: 'UPDATE_HISTORY', partId })
     }
-    const addToFavs = (partId: string) => send({ type: 'UPDATE_FAV', partId })
+    const addToFavs = (partId: string) =>
+        send({ type: 'UPDATE_FAV', partId })
 
     return <Container>
         <Header>
