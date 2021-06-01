@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 #%% Config
 # Based on: https://codelabs.developers.google.com/tflite-computer-vision-train-model
 image_path = "D:\\GIT\\machine-learning-project\\main\\_data_224\\"
-EPOCHS = 15
+EPOCHS = 1
 
 data = DataLoader.from_folder(image_path)
 train_data, test_data = data.split(0.9)
@@ -29,7 +29,7 @@ model = image_classifier.create(train_data, epochs=EPOCHS)
 loss, accuracy = model.evaluate(test_data)
 
 #%% export
-model.export(export_dir='saved_model', export_format=ExportFormat.SAVED_MODEL)
+model.export(export_dir='.', export_format=ExportFormat.SAVED_MODEL)
 model.export(export_dir='.', export_format=ExportFormat.LABEL)
 
 # %%
