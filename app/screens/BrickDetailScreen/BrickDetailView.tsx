@@ -23,14 +23,11 @@ export default function BrickDetailView(props: {
     part: PartDto,
     partColors: PartColorDto[]
 }) {
-    const [state, setState] = React.useState({prediction: ""})
-    if(state.prediction === "")
-        predict(require("../../assets/test.jpg")).then((result) => setState({prediction: result.class}))
-    const sortedColors = sortByColor(props.partColors, p => p.hex)
+       const sortedColors = sortByColor(props.partColors, p => p.hex)
     const defaultColor = sortedColors.find(s => isColorDark(s.hex) && !s.isTransparent) || sortedColors[0]
 
     return <View>
-        <H1 style={styles.h1}>{state.prediction}{props.part.name} ({props.part.id})</H1>
+        <H1 style={styles.h1}>{props.part.name} ({props.part.id})</H1>
         <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <View style={styles.imageContainer}>
                 <Image style={styles.image} source={{ uri: partImageUri(defaultColor.partId, defaultColor.colorId)}} />
