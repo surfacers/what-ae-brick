@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { assign, createMachine } from "xstate";
 import { createModel } from "xstate/lib/model";
 import {
@@ -19,6 +19,8 @@ import MaskSvg from "./mask.svg";
 import { predict } from "../../classification";
 import { opencv } from './opencvweb';
 import { allParts, PartDto } from '../../data';
+import { useNavigation } from "@react-navigation/core";
+import { useFocusEffect } from '@react-navigation/native'
 
 const scanModel = createModel(
   {
@@ -255,6 +257,21 @@ function Mask() {
 export function ScanBrick() {
   const cameraRef = useRef<Camera>(null);
   const webviewRef = useRef<WebView>(null);
+  const navigation = useNavigation();
+  const [isVisible, setIsVisible] = useState(false)
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log("camera visible");
+      setIsVisible(true)
+
+      return () => {
+        setIsVisible(false);
+        console.log("camera invisible");
+      }
+    }, [])
+  )
+  
   const [state, send] = useMachine(scanMachine, {
     actions: {
       preprocessImage: ({ images, processedImages }) => {
@@ -266,8 +283,9 @@ export function ScanBrick() {
         console.log(`TODO: save ${detectedBrickId} to history`)
       },
       showDetailScreen: ({ detectedBrickId }) => {
-        // TODO
-        console.log(`TODO: navigate to ${detectedBrickId}`)
+        console.log(`navigate do detail screen [${detectedBrickId}]`);
+        cameraRef.current?.pausePreview();
+        navigation.navigate("BrickDetailScreen",  {brickId: detectedBrickId , images:[]});
       }
     },
     services: {
@@ -294,11 +312,12 @@ export function ScanBrick() {
         onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
         containerStyle={{ position: "absolute", width: 300, height: 300 }}
       />
-      <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9">
-        <View style={styles.maskWrapper}>
-
-          <Mask />
-        </View>
+      <View style={styles.cameraContainer}>
+     {isVisible && <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9" >
+          <View style={{...styles.maskWrapper}}>
+          <Mask/>
+          </View>
+{/*         
         <View style={styles.debugContainer}>
           <Text style={styles.text}>
             State: {JSON.stringify(state.value, null, 2)}
@@ -322,7 +341,7 @@ export function ScanBrick() {
               />
             ))}
           </View>
-        </View>
+        </View>  */}
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -336,6 +355,8 @@ export function ScanBrick() {
           {/* <Button title="Reset" onPress={() => send("RESTART")}></Button> */}
         </View>
       </Camera>
+    }
+    </View>
     </View>
   );
 }
@@ -346,6 +367,10 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  cameraContainer: {
+    flex: 1,
+    backgroundColor:"black"
   },
   maskWrapper: {
     flex: 1,
