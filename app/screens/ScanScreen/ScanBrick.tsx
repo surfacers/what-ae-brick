@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { assign, createMachine } from "xstate";
 import { createModel } from "xstate/lib/model";
 import {
@@ -14,18 +14,27 @@ import { Camera } from "expo-camera";
 import CameraMask from "react-native-barcode-mask";
 import { useMachine } from "@xstate/react";
 import { raise } from "xstate/lib/actions";
+import WebView from "react-native-webview";
 import MaskSvg from "./mask.svg";
+import { predict } from "../../classification";
+import { opencv } from './opencvweb';
+import { allParts, PartDto } from '../../data';
 
 const scanModel = createModel(
   {
-    uris: [] as string[],
+    images: [] as string[],
+    processedImages: [] as string[],
+    detectedBrickId: "", // TODO: can be removed
+    detectedBrick: undefined as (PartDto | undefined)
   },
   {
     events: {
+      OPENCV_RUNTIME_INITIALIZED: () => ({}),
       SHUTTER_PRESSED: () => ({}),
       SHUTTER_RELEASED: () => ({}),
       SHUTTER_CANCELED: () => ({}),
       TAKE_PICTURE: () => ({}),
+      IMAGE_PREPROCESSED: (data: string) => ({ data }),
       RESTART: () => ({}),
     },
   }
@@ -34,125 +43,179 @@ const scanModel = createModel(
 const scanMachine = createMachine<typeof scanModel>(
   {
     id: "scan",
-    initial: "idle",
+    type: "parallel",
     context: scanModel.initialContext,
     states: {
-      idle: {
-        entry: [assign(() => scanModel.initialContext)],
-        on: {
-          SHUTTER_PRESSED: "scanning",
-        },
-      },
-      scanning: {
-        on: {
-          SHUTTER_CANCELED: "idle",
-        },
-        initial: "first",
-        type: "parallel",
+      opencv: {
+        initial: "loading",
         states: {
-          shutter: {
-            initial: "pressed",
-            states: {
-              pressed: {
-                on: {
-                  SHUTTER_RELEASED: {
-                    target: "released",
-                    actions: [raise("TAKE_PICTURE")],
-                  },
-                },
-                after: {
-                  SHUTTER_HOLDING: {
-                    target: "holding",
-                    actions: [raise("TAKE_PICTURE")],
-                  },
-                },
-              },
-              holding: {
-                on: {
-                  SHUTTER_RELEASED: {
-                    target: "released",
-                    actions: [raise("TAKE_PICTURE")],
-                  },
-                },
-                after: {
-                  MULTIPLE_PICTURES_DELAY: {
-                    target: "holding",
-                    actions: [raise("TAKE_PICTURE")],
-                  },
-                },
-              },
-              released: {
-                type: "final",
-              },
+          loading: {
+            on: {
+              OPENCV_RUNTIME_INITIALIZED: "ready"
+            }
+          },
+          ready: {
+            type: "final"
+          }
+        }
+      },
+      detection: {
+        initial: "idle",
+        states: {
+          idle: {
+            entry: [assign(() => scanModel.initialContext)],
+            on: {
+              SHUTTER_PRESSED: "scanning",
             },
           },
-          picture: {
-            initial: "initial",
+          scanning: {
+            on: {
+              SHUTTER_CANCELED: "idle",
+            },
+            initial: "first",
+            type: "parallel",
             states: {
-              initial: {
-                on: {
-                  TAKE_PICTURE: "taking",
+              shutter: {
+                initial: "pressed",
+                states: {
+                  pressed: {
+                    on: {
+                      SHUTTER_RELEASED: {
+                        target: "released",
+                        actions: [raise("TAKE_PICTURE")],
+                      },
+                    },
+                    after: {
+                      SHUTTER_HOLDING: {
+                        target: "holding",
+                        actions: [raise("TAKE_PICTURE")],
+                      },
+                    },
+                  },
+                  holding: {
+                    on: {
+                      SHUTTER_RELEASED: {
+                        target: "released",
+                        actions: [raise("TAKE_PICTURE")],
+                      },
+                    },
+                    after: {
+                      MULTIPLE_PICTURES_DELAY: {
+                        target: "holding",
+                        actions: [raise("TAKE_PICTURE")],
+                      },
+                    },
+                  },
+                  released: {
+                    type: "final",
+                  },
                 },
               },
-              taking: {
-                invoke: {
-                  id: "takePicture",
-                  src: "takePicture",
-                  onDone: {
-                    target: "idle",
+              picture: {
+                initial: "initial",
+                states: {
+                  initial: {
+                    on: {
+                      TAKE_PICTURE: "taking",
+                    },
+                  },
+                  taking: {
+                    invoke: {
+                      id: "takePicture",
+                      src: "takePicture",
+                      onDone: {
+                        target: "idle",
+                        actions: [
+                          assign({
+                            images: (context, event) => [...context.images, event.data],
+                          }),
+                        ],
+                      },
+                      onError: "idle",
+                    },
+                  },
+                  idle: {
+                    type: "final",
+                    on: {
+                      TAKE_PICTURE: "taking",
+                    },
+                  },
+                },
+              },
+            },
+            onDone: "preprocessing",
+          },
+          preprocessing: {
+            initial: "waitingForOpenCV",
+            states: {
+              waitingForOpenCV: {
+                always: {
+                  target: "processImage",
+                  in: "#scan.opencv.ready"
+                }
+              },
+              processImage: {
+                entry: ["preprocessImage"],
+                on: {
+                  IMAGE_PREPROCESSED: {
+                    target: "imageProcessed",
                     actions: [
                       assign({
-                        uris: (context, event) => [...context.uris, event.data],
-                      }),
-                    ],
-                  },
-                  onError: "idle",
-                },
+                        processedImages: ({ processedImages }, { data: image }) => [...processedImages, image],
+                      })
+                    ]
+                  }
+                }
               },
-              idle: {
-                type: "final",
-                on: {
-                  TAKE_PICTURE: "taking",
+              imageProcessed: {
+                always: [{
+                  target: "completed",
+                  cond: ({ images, processedImages }) => images.length === processedImages.length
                 },
+                {
+                  target: "processImage"
+                }],
               },
+              completed: {
+                type: "final"
+              }
+            },
+            onDone: {
+              target: "detecting"
+            },
+          },
+          detecting: {
+            invoke: {
+              src: "detectBrick",
+              onDone: {
+                target: "brick_detected",
+                actions: [
+                  assign({
+                    detectedBrickId: (_, event) => event.data,
+                    detectedBrick: (_, event) => allParts.find(p => p.id == event.data)
+                  }),
+                ]
+              },
+              onError: "brick_not_detected",
+            },
+          },
+          brick_detected: {
+            entry: [
+              "saveBrickToHistory",
+              "showDetailScreen"
+            ],
+            on: {
+              SHUTTER_PRESSED: "idle",
+            },
+          },
+          brick_not_detected: {
+            on: {
+              SHUTTER_PRESSED: "idle",
             },
           },
         },
-        onDone: "preprocessing",
-      },
-      preprocessing: {
-        // invoke: {
-        //   src: "preprocessImages",
-        //   onDone: "detecting",
-        // },
-        /* --- remove this if service works --- */
-        on: {
-          SHUTTER_PRESSED: {
-            target: "scanning",
-            actions: [assign(() => scanModel.initialContext)],
-          },
-        },
-      },
-      detecting: {
-        invoke: {
-          src: "detectBrick",
-          onDone: "brick_detected",
-          onError: "brick_not_detected",
-        },
-      },
-      brick_detected: {
-        type: "final",
-        on: {
-          RESTART: "idle",
-        },
-      },
-      brick_not_detected: {
-        type: "final",
-        on: {
-          RESTART: "idle",
-        },
-      },
-    },
+      }
+    }
   },
   {
     delays: {
@@ -191,47 +254,71 @@ function Mask() {
 
 export function ScanBrick() {
   const cameraRef = useRef<Camera>(null);
+  const webviewRef = useRef<WebView>(null);
   const [state, send] = useMachine(scanMachine, {
+    actions: {
+      preprocessImage: ({ images, processedImages }) => {
+        const image = images[processedImages.length]
+        webviewRef.current!.injectJavaScript(`preprocess("${image}")`)
+      },
+      saveBrickToHistory: ({ detectedBrickId }) => {
+        // TODO
+        console.log(`TODO: save ${detectedBrickId} to history`)
+      },
+      showDetailScreen: ({ detectedBrickId }) => {
+        // TODO
+        console.log(`TODO: navigate to ${detectedBrickId}`)
+      }
+    },
     services: {
       takePicture: () =>
-        cameraRef.current!.takePictureAsync().then((result) => result.uri),
+        cameraRef.current!.takePictureAsync({ base64: true, quality: 0 }).then(
+          (result) => "data:image/jpg;base64," + result.base64),
+      detectBrick: ({processedImages}) => predict(processedImages[0])
     },
   });
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} ref={cameraRef}>
+      <WebView
+        // injectedJavaScriptBeforeContentLoaded={`
+        //       window.onerror = function(message, sourcefile, lineno, colno, error) {
+        //         alert("Message: " + message + " - Source: " + sourcefile + " Line: " + lineno + ":" + colno);
+        //         return true;
+        //       };
+        //       true;
+        //     `}
+        ref={webviewRef}
+        originWhitelist={['*']}
+        source={{ html: opencv }}
+        onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
+        containerStyle={{ position: "absolute", width: 300, height: 300 }}
+      />
+      <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9">
         <View style={styles.maskWrapper}>
 
-        <Mask />
+          <Mask />
         </View>
-        {/* <CameraMask
-          height={200}
-          width={200}
-          lineAnimationDuration={1000}
-          edgeBorderWidth={3}
-          outerMaskOpacity={0.7}
-          showAnimatedLine={false}
-          // onLayoutMeasured={(value) => console.log({layout: value})}
-        ></CameraMask> */}
         <View style={styles.debugContainer}>
           <Text style={styles.text}>
             State: {JSON.stringify(state.value, null, 2)}
           </Text>
-          {/* <Text style={styles.text}>
-            Picture Uris:{" "}
-            {JSON.stringify(
-              state.context.uris.map((uri) => uri.split("/").pop()),
-              null,
-              2
-            )}
-          </Text> */}
+          <Text style={styles.text}>Detected: {state.context.detectedBrick?.id} {state.context.detectedBrick?.name}</Text>
           <View style={{ flex: 1, flexDirection: "row" }}>
-            {state.context.uris.map((uri) => (
+            {state.context.images.map((base64, index) => (
               <Image
-                key={uri.split("/").pop()}
+                key={index}
                 style={{ width: 50, height: 50 }}
-                source={{ uri }}
+                source={{ uri: base64 }}
+              />
+            ))}
+          </View>
+          <View style={{ flex: 1, flexDirection: "row" }}>
+            {state.context.processedImages.map((base64, index) => (
+              <Image
+                key={index}
+                style={{ width: 50, height: 50 }}
+                source={{ uri: base64 }}
               />
             ))}
           </View>
@@ -242,7 +329,7 @@ export function ScanBrick() {
             style={styles.button}
             onPressIn={() => send("SHUTTER_PRESSED")}
             onPressOut={() => send("SHUTTER_RELEASED")}
-            // onPress={() => cameraRef.current?.pausePreview()}
+          // onPress={() => cameraRef.current?.pausePreview()}
           >
             <View style={styles.shutterButton}></View>
           </TouchableOpacity>
@@ -267,7 +354,6 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 40
   },
   buttonContainer: {
     flex: 1,
