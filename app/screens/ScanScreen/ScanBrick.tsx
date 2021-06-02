@@ -16,7 +16,7 @@ import { useMachine } from "@xstate/react";
 import { raise } from "xstate/lib/actions";
 import WebView from "react-native-webview";
 import MaskSvg from "./mask.svg";
-import { predict } from "../../classification";
+import { predict, initModel } from "../../classification";
 import { opencv } from './opencvweb';
 import { allParts, PartDto } from '../../data';
 
@@ -59,16 +59,33 @@ const scanMachine = createMachine<typeof scanModel>(
           }
         }
       },
+      tensorflow: {
+        initial: "loading",
+        states: {
+          loading: {
+            invoke: {
+              id: "initializeTensorflow",
+              src: initModel,
+              onDone: "ready"
+            },
+          },
+          ready: {
+            type: "final"
+          }
+        }
+      },
       detection: {
         initial: "idle",
         states: {
           idle: {
+            tags: "idle",
             entry: [assign(() => scanModel.initialContext)],
             on: {
               SHUTTER_PRESSED: "scanning",
             },
           },
           scanning: {
+            tags: "scanning",
             on: {
               SHUTTER_CANCELED: "idle",
             },
@@ -146,6 +163,7 @@ const scanMachine = createMachine<typeof scanModel>(
             onDone: "preprocessing",
           },
           preprocessing: {
+            tags: "preprocessing",
             initial: "waitingForOpenCV",
             states: {
               waitingForOpenCV: {
@@ -185,30 +203,44 @@ const scanMachine = createMachine<typeof scanModel>(
             },
           },
           detecting: {
-            invoke: {
-              src: "detectBrick",
-              onDone: {
-                target: "brick_detected",
-                actions: [
-                  assign({
-                    detectedBrickId: (_, event) => event.data,
-                    detectedBrick: (_, event) => allParts.find(p => p.id == event.data)
-                  }),
-                ]
+            tags: "detecting",
+            initial: "waitingForTensorflow",
+            states: {
+              waitingForTensorflow: {
+                always: {
+                  target: "detectBrick",
+                  in: "#scan.tensorflow.ready"
+                }
               },
-              onError: "brick_not_detected",
+              detectBrick: {
+                invoke: {
+                  id: "detectBrick",
+                  src: "detectBrick",
+                  onDone: {
+                    target: "completed",
+                    actions: [
+                      assign({
+                        detectedBrickId: (_, event) => event.data,
+                        detectedBrick: (_, event) => allParts.find(p => p.id == event.data)
+                      }),
+                    ]
+                  },
+                }
+              },
+              completed: {
+                type: "final"
+              }
+            },
+            onDone: {
+              target: "brick_detected"
             },
           },
           brick_detected: {
+            tags: "detected",
             entry: [
               "saveBrickToHistory",
               "showDetailScreen"
             ],
-            on: {
-              SHUTTER_PRESSED: "idle",
-            },
-          },
-          brick_not_detected: {
             on: {
               SHUTTER_PRESSED: "idle",
             },
@@ -274,7 +306,7 @@ export function ScanBrick() {
       takePicture: () =>
         cameraRef.current!.takePictureAsync({ base64: true, quality: 0 }).then(
           (result) => "data:image/jpg;base64," + result.base64),
-      detectBrick: ({processedImages}) => predict(processedImages[0])
+      detectBrick: ({ processedImages }) => predict(processedImages[0])
     },
   });
 
