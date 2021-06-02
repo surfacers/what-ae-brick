@@ -21,6 +21,7 @@ import { opencv } from './opencvweb';
 import { allParts, PartDto } from '../../data';
 import { useNavigation } from "@react-navigation/core";
 import { useFocusEffect } from '@react-navigation/native'
+import { Loading } from "../../components";
 
 const scanModel = createModel(
   {
@@ -149,6 +150,7 @@ const scanMachine = createMachine<typeof scanModel>(
           },
           preprocessing: {
             initial: "waitingForOpenCV",
+            tags: "processing",
             states: {
               waitingForOpenCV: {
                 always: {
@@ -187,6 +189,7 @@ const scanMachine = createMachine<typeof scanModel>(
             },
           },
           detecting: {
+            tags: "processing",
             invoke: {
               src: "detectBrick",
               onDone: {
@@ -271,7 +274,7 @@ export function ScanBrick() {
       }
     }, [])
   )
-  
+
   const [state, send] = useMachine(scanMachine, {
     actions: {
       preprocessImage: ({ images, processedImages }) => {
@@ -285,14 +288,14 @@ export function ScanBrick() {
       showDetailScreen: ({ detectedBrickId }) => {
         console.log(`navigate do detail screen [${detectedBrickId}]`);
         cameraRef.current?.pausePreview();
-        navigation.navigate("BrickDetailScreen",  {brickId: detectedBrickId , images:[]});
+        navigation.navigate("BrickDetailScreen", { brickId: detectedBrickId, images: [] });
       }
     },
     services: {
       takePicture: () =>
         cameraRef.current!.takePictureAsync({ base64: true, quality: 0 }).then(
           (result) => "data:image/jpg;base64," + result.base64),
-      detectBrick: ({processedImages}) => predict(processedImages[0])
+      detectBrick: ({ processedImages }) => predict(processedImages[0])
     },
   });
 
@@ -312,36 +315,46 @@ export function ScanBrick() {
         onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
         containerStyle={{ position: "absolute", width: 300, height: 300 }}
       />
-      <View style={styles.cameraContainer}>
-     {isVisible && <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9" >
-          <View style={{...styles.maskWrapper}}>
-          <Mask/>
+
+      {isVisible && <View style={styles.cameraContainer}>
+        <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9" >
+          <View style={styles.debugContainer}>
+            <Text style={styles.text}>
+              State: {JSON.stringify(state.value, null, 2)}
+            </Text>
+            <Text style={styles.text}>Detected: {state.context.detectedBrick?.id} {state.context.detectedBrick?.name}</Text>
+            <View style={{ flex: 1, flexDirection: "row" }}>
+              {state.context.images.map((base64, index) => (
+                <Image
+                  key={index}
+                  style={{ width: 50, height: 50 }}
+                  source={{ uri: base64 }}
+                />
+              ))}
+            </View>
+            <View style={{ flex: 1, flexDirection: "row" }}>
+              {state.context.processedImages.map((base64, index) => (
+                <Image
+                  key={index}
+                  style={{ width: 50, height: 50 }}
+                  source={{ uri: base64 }}
+                />
+              ))}
+            </View>
           </View>
-{/*         
-        <View style={styles.debugContainer}>
-          <Text style={styles.text}>
-            State: {JSON.stringify(state.value, null, 2)}
-          </Text>
-          <Text style={styles.text}>Detected: {state.context.detectedBrick?.id} {state.context.detectedBrick?.name}</Text>
-          <View style={{ flex: 1, flexDirection: "row" }}>
-            {state.context.images.map((base64, index) => (
-              <Image
-                key={index}
-                style={{ width: 50, height: 50 }}
-                source={{ uri: base64 }}
-              />
-            ))}
+
+
+        </Camera>
+
+        {state.hasTag("processing") ?
+          <View style={styles.maskWrapper}>
+            <Loading color="white" scale={0.5} text="Looking for answers..." />
           </View>
-          <View style={{ flex: 1, flexDirection: "row" }}>
-            {state.context.processedImages.map((base64, index) => (
-              <Image
-                key={index}
-                style={{ width: 50, height: 50 }}
-                source={{ uri: base64 }}
-              />
-            ))}
+          :
+          <View style={styles.maskWrapper}>
+            <Mask />
           </View>
-        </View>  */}
+        }
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -354,9 +367,9 @@ export function ScanBrick() {
           </TouchableOpacity>
           {/* <Button title="Reset" onPress={() => send("RESTART")}></Button> */}
         </View>
-      </Camera>
-    }
-    </View>
+      </View>
+      }
+
     </View>
   );
 }
@@ -367,13 +380,15 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+    width: '100%',
+    height: '100%',
   },
   cameraContainer: {
     flex: 1,
-    backgroundColor:"black"
+
+    backgroundColor: "black"
   },
   maskWrapper: {
-    flex: 1,
     position: 'absolute',
     width: '100%',
     height: '100%',
@@ -381,12 +396,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   buttonContainer: {
-    flex: 1,
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
     backgroundColor: "transparent",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    margin: 20,
   },
   debugContainer: {
     position: "absolute",
@@ -406,5 +422,6 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     backgroundColor: "white",
+    marginBottom: 20
   },
 });
