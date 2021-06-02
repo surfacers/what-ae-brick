@@ -294,7 +294,7 @@ export function ScanBrick() {
         onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
         containerStyle={{ position: "absolute", width: 300, height: 300 }}
       />
-      <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium">
+      <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9">
         <View style={styles.maskWrapper}>
 
           <Mask />
