@@ -9,6 +9,7 @@ import {
   Button,
   Image,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { Camera } from "expo-camera";
 import CameraMask from "react-native-barcode-mask";
@@ -16,12 +17,13 @@ import { useMachine } from "@xstate/react";
 import { raise } from "xstate/lib/actions";
 import WebView from "react-native-webview";
 import MaskSvg from "./mask.svg";
-import { predict } from "../../classification";
+import { predict, initModel } from "../../classification";
 import { opencv } from './opencvweb';
 import { allParts, PartDto } from '../../data';
 import { useNavigation } from "@react-navigation/core";
 import { useFocusEffect } from '@react-navigation/native'
 import { Loading } from "../../components";
+import { Popover } from "react-native-popable"
 
 const scanModel = createModel(
   {
@@ -38,7 +40,7 @@ const scanModel = createModel(
       SHUTTER_CANCELED: () => ({}),
       TAKE_PICTURE: () => ({}),
       IMAGE_PREPROCESSED: (data: string) => ({ data }),
-      RESTART: () => ({}),
+      SHOW_DETAIL: () => ({})
     },
   }
 );
@@ -62,16 +64,33 @@ const scanMachine = createMachine<typeof scanModel>(
           }
         }
       },
+      tensorflow: {
+        initial: "loading",
+        states: {
+          loading: {
+            invoke: {
+              id: "initializeTensorflow",
+              src: initModel,
+              onDone: "ready"
+            },
+          },
+          ready: {
+            type: "final"
+          }
+        }
+      },
       detection: {
         initial: "idle",
         states: {
           idle: {
+            tags: ["shutterEnabled", "scanning", "idle"],
             entry: [assign(() => scanModel.initialContext)],
             on: {
               SHUTTER_PRESSED: "scanning",
             },
           },
           scanning: {
+            tags: ["shutterEnabled", "scanning"],
             on: {
               SHUTTER_CANCELED: "idle",
             },
@@ -149,6 +168,7 @@ const scanMachine = createMachine<typeof scanModel>(
             onDone: "preprocessing",
           },
           preprocessing: {
+            tags: ["processing", "preprocessing"],
             initial: "waitingForOpenCV",
             tags: "processing",
             states: {
@@ -189,32 +209,45 @@ const scanMachine = createMachine<typeof scanModel>(
             },
           },
           detecting: {
-            tags: "processing",
-            invoke: {
-              src: "detectBrick",
-              onDone: {
-                target: "brick_detected",
-                actions: [
-                  assign({
-                    detectedBrickId: (_, event) => event.data,
-                    detectedBrick: (_, event) => allParts.find(p => p.id == event.data)
-                  }),
-                ]
+            tags: ["processing", "detecting"],
+            initial: "waitingForTensorflow",
+            states: {
+              waitingForTensorflow: {
+                always: {
+                  target: "detectBrick",
+                  in: "#scan.tensorflow.ready"
+                }
               },
-              onError: "brick_not_detected",
+              detectBrick: {
+                invoke: {
+                  id: "detectBrick",
+                  src: "detectBrick",
+                  onDone: {
+                    target: "completed",
+                    actions: [
+                      assign({
+                        detectedBrickId: (_, event) => event.data,
+                        detectedBrick: (_, event) => allParts.find(p => p.id == event.data)
+                      }),
+                    ]
+                  },
+                }
+              },
+              completed: {
+                type: "final"
+              }
+            },
+            onDone: {
+              target: "brick_detected"
             },
           },
           brick_detected: {
+            tags: ["shutterEnabled", "detected"],
             entry: [
-              "saveBrickToHistory",
-              "showDetailScreen"
+              "saveBrickToHistory"
             ],
             on: {
-              SHUTTER_PRESSED: "idle",
-            },
-          },
-          brick_not_detected: {
-            on: {
+              SHOW_DETAIL: {actions: ["showDetailScreen"]},
               SHUTTER_PRESSED: "idle",
             },
           },
@@ -346,6 +379,22 @@ export function ScanBrick() {
           </View> */}
           </Camera>
         }
+        <View style={styles.maskContainer}>
+        {
+          state.hasTag("processing") &&
+          <View>
+            <Loading text={state.hasTag("preprocessing") ? "Extracting the brick...": 
+                          state.hasTag("detecting") ? "Detecting the brick..." : ""}/>
+            {/* <Text style={{ color: "white", marginTop: 10 }}>
+              {state.hasTag("preprocessing") && "Extracting the brick..."}
+              {state.hasTag("detecting") && "Detecting the brick..."}
+            </Text> */}
+          </View>
+        
+        }
+        {state.hasTag("scanning") && <Mask />}
+        </View>
+        
         {state.hasTag("processing") ?
           <View style={styles.maskWrapper}>
             <Loading color="white" scale={0.5} text="Looking for answers..." />
@@ -355,6 +404,17 @@ export function ScanBrick() {
             <Mask />
           </View>
         }
+        <View style={styles.detectedContainer}>
+          <TouchableOpacity onPress={() => send("SHOW_DETAIL")}>
+          <Popover
+            backgroundColor="white"
+            position="top"
+            visible={state.hasTag("detected")}
+            style={{ alignItems: "center", justifyContent: "space-between", height: 35 }}>
+            <Text style={{ color: "black", margin: 5 }}>{state.context.detectedBrick?.name}</Text>
+          </Popover>
+        </TouchableOpacity>
+        </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
@@ -367,6 +427,7 @@ export function ScanBrick() {
           {/* <Button title="Reset" onPress={() => send("RESTART")}></Button> */}
         </View>
       </View>
+
     </View>
   );
 }
@@ -382,7 +443,6 @@ const styles = StyleSheet.create({
   },
   cameraContainer: {
     flex: 1,
-
     backgroundColor: "black"
   },
   maskWrapper: {
@@ -420,5 +480,27 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: "white",
     marginBottom: 20
+  },
+  detectedContainer: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "flex-end"
+  },
+  detectedPopover: {
+  },
+  maskContainer: {
+    flexGrow: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    // width: 200,
+    height: 200
+  },
+  shutterContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 20,
   },
 });

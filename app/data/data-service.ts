@@ -1,5 +1,5 @@
-import { allPartColors } from './part-colors'
-import { allParts } from './parts'
+import { allPartColors } from './part-colors.data'
+import { allParts } from './parts.data'
 
 // TODO: Rename file
 
