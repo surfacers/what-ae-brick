@@ -5,7 +5,7 @@ import { fetch, decodeJpeg, bundleResourceIO } from '@tensorflow/tfjs-react-nati
 
 let model:tf.GraphModel | undefined;
 
-async function initModel(){
+export async function initModel(){
     await tf.ready();
     const modelJson = require('../assets/model/model.json');
     const modelWeights1 = require('../assets/model/group1-shard1of4.bin');
@@ -17,11 +17,6 @@ async function initModel(){
             [modelWeights1,modelWeights2,modelWeights3,modelWeights4]));
 }
 export async function predict(image:string) : Promise<string> {
-    if(model === undefined){
-        console.log("init model")
-        await initModel();
-        console.log("model initialized")
-    }
     if(model !== undefined){
         const b = Buffer.from(image.replace("data:image/jpeg;base64,", ""), 'base64')
         const imageTensor =  decodeJpeg(b).reshape([1, 224, 224, 3]).asType('float32').div(255.0);
