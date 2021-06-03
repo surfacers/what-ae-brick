@@ -1,2 +1,2 @@
-export * from './part-colors';
-export * from './parts';
+export * from './part-colors.data';
+export * from './parts.data';
