@@ -6,7 +6,6 @@ export interface WishlistItem {
     id: string
     partId: string
     partName: string
-    uri: string // TODO: remove?
 }
 
 export interface WishlistFetchResult {
@@ -19,13 +18,12 @@ export const fetchWishlist = () => new Promise<WishlistFetchResult>(async (resol
         const favs = await fetchFavs()
         const wishlist = [...favs].map(partId => {
             const part = allPartsById[partId]
-            const color = allPartColorsById[partId][1].colorId // TODO:
+            const color = allPartColorsById[partId][0].colorId // TODO:
 
             return {
                 id: uuid(),
                 partId: part.id,
-                partName: part.name,
-                uri: `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color}/${part.id}.png/230x230.png`
+                partName: part.name
             }
         })
         resolve({ items: wishlist, favs })

@@ -1,9 +1,9 @@
-import React from "react";
 import { Camera } from "expo-camera";
-import { useRequestPermission } from "../../machines/permission.machine";
-import { ScanBrick } from "./ScanBrick";
-import { MissingCameraPermission } from "./MissingCameraPermission";
+import React from "react";
 import { ActivityIndicator } from "react-native";
+import { useRequestPermission } from "../../machines/permission.machine";
+import { MissingCameraPermission } from "./MissingCameraPermission";
+import { ScanBrick } from "./ScanBrick";
 
 export default function ScanScreen() {
   const {
@@ -14,11 +14,10 @@ export default function ScanScreen() {
     Camera.requestPermissionsAsync().then(({ status }) => status === "granted")
   );
 
-  return isCheckingCameraPermission ? (
-    <ActivityIndicator />
-  ) : hasCameraPermission ? (
-    <ScanBrick />
-  ) : (
-    <MissingCameraPermission requestPermission={rerequestCameraPermission} />
-  );
+  return isCheckingCameraPermission
+        ? <ActivityIndicator />
+        :
+    hasCameraPermission
+        ? <ScanBrick />
+        : <MissingCameraPermission requestPermission={rerequestCameraPermission} />;
 }

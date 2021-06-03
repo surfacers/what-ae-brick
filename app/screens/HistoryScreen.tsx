@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { Error, List, Loading } from '../components';
 import { addPartToFavs, fetchFavs } from '../data/favs.service';
 import { fetchHistory, saveToHistory } from '../data/history.service';
-import { allParts } from '../data/parts.data';
+import { partImageUrl } from '../data/parts.service';
 import { historyMachine, HistoryTag } from '../machines/history.machine';
 
 export default function HistoryScreen() {
@@ -39,11 +39,6 @@ export default function HistoryScreen() {
         return unsubscribe;
         }, [navigation]);
 
-    const addToHistory = () => {
-        // TODO: for testing random
-        const partId = allParts[Math.floor(Math.random() * allParts.length)].id
-        send({ type: 'UPDATE_HISTORY', partId })
-    }
     const addToFavs = (partId: string) =>
         send({ type: 'UPDATE_FAV', partId })
 
@@ -56,12 +51,13 @@ export default function HistoryScreen() {
             state.hasTag(HistoryTag.success)
                 ? <List data={state.context.parts ?? []}
                         keyExtractor={item => item.id}
+                        emptyText="No parts scanned"
                         loading={state.hasTag(HistoryTag.loading)}
                         reload={() => send({ type: 'RETRY' })}
                         renderItem={({ item }) => (
                             <ListItem thumbnail key={item.id} onPress={() => navigateToDetails(item.partId)}>
                                 <Left>
-                                    <Thumbnail square source={{uri: item.uri}} />
+                                    <Thumbnail square source={{uri: partImageUrl(item.partId) }} />
                                 </Left>
                                 <Body>
                                     <Text>{item.partName}</Text>

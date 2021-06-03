@@ -2,10 +2,13 @@ import { Text, View } from 'native-base';
 import * as React from 'react';
 import { FlatList, Image, ListRenderItem, RefreshControl, StyleSheet } from 'react-native';
 
-const EmptyList = () => (
+interface EmptyListParams {
+    emptyText: string
+}
+const EmptyList = ({ emptyText }: EmptyListParams) => (
     <View style={styles.container}>
         <Image style={ styles.image } source={require('../assets/images/empty.png')}></Image>
-        <Text style={styles.helpText}>No scanned bricks</Text>
+        <Text style={styles.helpText}>{emptyText}</Text>
     </View>
 );
 
@@ -15,15 +18,16 @@ interface ListParams<Item> {
     renderItem: ListRenderItem<Item> | null | undefined,
     loading: boolean,
     reload: () => void
+    emptyText: string
 }
 export const List = <Item extends unknown>
-    ({ data, keyExtractor, renderItem, loading, reload }: ListParams<Item>) => (
+    ({ data, keyExtractor, renderItem, loading, reload, emptyText }: ListParams<Item>) => (
     <View  style={{flex: 1}}>
         <FlatList
             contentContainerStyle={{ flexGrow: 1 }}
             refreshControl={
                 <RefreshControl refreshing={loading} onRefresh={reload} />}
-            ListEmptyComponent={EmptyList}
+            ListEmptyComponent={() => EmptyList({ emptyText })}
             data={data}
             keyExtractor={keyExtractor}
             renderItem={renderItem}>

@@ -2,14 +2,9 @@ import { Button, H1, Text, View } from 'native-base';
 import * as React from 'react';
 import { Image, Linking, StyleSheet } from 'react-native';
 import { PartColorDto, PartDto } from '../../data';
-import { isColorDark, sortByColor } from './ColorView/ColorUtils';
+import { partImageUrl } from '../../data/parts.service';
 import ColorView from './ColorView';
-import {predict} from '../../classification';
-import { StackActions } from '@react-navigation/routers';
-
-// TODO: put somewhere else
-const partImageUri = (partId: string, colorId: string) =>
-    `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${colorId}/${partId}.png/230x230.png`
+import { sortByColor } from './ColorView/ColorUtils';
 
 const openBrickLink = (partId: string) =>
     Linking.openURL(`https://www.bricklink.com/v2/catalog/catalogitem.page?P=${partId}`)
@@ -22,14 +17,13 @@ export default function BrickDetailView(props: {
     part: PartDto,
     partColors: PartColorDto[]
 }) {
-       const sortedColors = sortByColor(props.partColors, p => p.hex)
-    const defaultColor = sortedColors.find(s => isColorDark(s.hex) && !s.isTransparent) || sortedColors[0]
+    const sortedColors = sortByColor(props.partColors, p => p.hex)
 
     return <View>
         <H1 style={styles.h1}>{props.part.name} ({props.part.id})</H1>
         <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <View style={styles.imageContainer}>
-                <Image style={styles.image} source={{ uri: partImageUri(defaultColor.partId, defaultColor.colorId)}} />
+                <Image style={styles.image} source={{ uri: partImageUrl(props.part.id) }} />
             </View>
         </View>
         <View style={styles.infoContainer}>

@@ -5,6 +5,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { Error, List, Loading } from '../components';
 import { addPartToFavs } from '../data/favs.service';
+import { partImageUrl } from '../data/parts.service';
 import { fetchWishlist } from '../data/wishlist.service';
 import { wishlistMachine, WishlistTag } from '../machines/wishlist.machine';
 
@@ -42,12 +43,13 @@ export default function WishlistScreen() {
             state.hasTag(WishlistTag.success)
                 ? <List data={state.context.items ?? []}
                         keyExtractor={item => item.id}
+                        emptyText="No parts in wishlist"
                         loading={state.hasTag(WishlistTag.loading)}
                         reload={() => send({ type: 'RETRY' })}
                         renderItem={({ item }) => (
                             <ListItem thumbnail key={item.id} onPress={() => navigateToDetails(item.partId)}>
                                 <Left>
-                                    <Thumbnail square source={{uri: item.uri}} />
+                                    <Thumbnail square source={{uri: partImageUrl(item.partId)}} />
                                 </Left>
                                 <Body>
                                     <Text>{item.partName}</Text>

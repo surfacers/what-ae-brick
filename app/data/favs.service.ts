@@ -6,12 +6,12 @@ export type Favs = Set<string>
 
 export const addPartToFavs = (favs: Favs, partId: string) => new Promise<Favs>(async (resolve, reject) => {
     try {
-        // TODO: Newly favourites should be added on top!
-        let newFavs = new Set(favs)
-        if (newFavs.has(partId)) {
+        let newFavs: Favs
+        if (favs.has(partId)) {
+            newFavs = new Set(favs)
             newFavs.delete(partId)
         } else {
-            newFavs.add(partId)
+            newFavs = new Set([partId, ...favs])
         }
 
         newFavs = await saveFavs(newFavs)

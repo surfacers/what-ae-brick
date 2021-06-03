@@ -7,6 +7,7 @@ import {
   View,
   Text,
   Animated,
+  Image
 } from "react-native";
 import { Camera } from "expo-camera";
 import { useMachine } from "@xstate/react";
@@ -238,9 +239,7 @@ const scanMachine = createMachine<typeof scanModel>(
           },
           brick_detected: {
             tags: ["shutterEnabled", "detected"],
-            entry: [
-              "saveBrickToHistory"
-            ],
+            entry: ["saveBrickToHistory"],
             on: {
               SHOW_DETAIL: { actions: "showDetailScreen" },
               SHUTTER_PRESSED: "idle",
@@ -311,8 +310,8 @@ export function ScanBrick() {
     },
     services: {
       takePicture: () =>
-        cameraRef.current!.takePictureAsync({ base64: true, quality: 0 }).then(
-          (result) => "data:image/jpg;base64," + result.base64),
+        cameraRef.current!.takePictureAsync({ base64: true, quality: 0 })
+            .then((result) => "data:image/jpg;base64," + result.base64),
       detectBrick: ({ processedImages }) => predict(processedImages[0])
     },
   });

@@ -28,3 +28,20 @@ export const fetchPartColors = (partId: string) => new Promise<PartColorDto[]>((
     const colors = allPartColorsById[partId]
     resolve(colors != null ? colors : [])
 })
+
+export const partImageUrl = (partId: string): string => {
+    const part = allPartsById[partId]
+    if (part == null) {
+        return ""
+    }
+
+    let color = allPartColorsById[partId]
+        .filter(p => !p.isTransparent)
+        .sort((a, b) => b.sets - a.sets)[0] // Sort desc by sets
+
+    if (color == null) {
+        color = allPartColorsById[partId][0]
+    }
+
+    return `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${color.colorId}/${part.id}.png/230x230.png`
+}

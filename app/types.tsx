@@ -22,7 +22,7 @@ export type HistoryParamList = {
 
 export type ScanParamList = {
     ScanScreen: undefined
-    BrickDetailScreen: { partId: string } // TODO: sollen wir jetzt das Bild anzeigen (das gescannte?)
+    BrickDetailScreen: { partId: string }
     ErrorScreen: { error: Error }
 };
 
