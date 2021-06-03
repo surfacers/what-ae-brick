@@ -7,7 +7,6 @@ import BrickDetailScreen from '../screens/BrickDetailScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import ScanScreen from '../screens/ScanScreen';
 import WishlistScreen from '../screens/WishlistScreen';
-import { HistoryNavigator } from './HistoryNavigator';
 import { ScanNavigator } from './ScanNavigator';
 import { BottomTabParamList, HistoryParamList, WishlistParamList } from '../types';
 
