@@ -40,9 +40,19 @@ export default function BrickDetailView(props: {
                     {props.part.productionFrom}-{props.part.productionTo}
                 </Text>
             </View>
+            {props.part.prints > 0 &&
             <View style={styles.infoElement}>
                 <Text style={styles.infoTitle}>{'# Prints'}</Text>
                 <Text style={styles.infoSubTitle}>{props.part.prints}</Text>
+            </View>
+            }
+            <View style={styles.infoElement}>
+                <Text style={styles.infoTitle}>{'# Sets'}</Text>
+                <Text style={styles.infoSubTitle}>{props.part.sets}</Text>
+            </View>
+            <View style={styles.infoElement}>
+                <Text style={styles.infoTitle}>{'# Set parts'}</Text>
+                <Text style={styles.infoSubTitle}>{props.part.setParts}</Text>
             </View>
         </View>
         <View style={styles.buttonContainer}>
@@ -76,7 +86,7 @@ const styles = StyleSheet.create({
     },
     infoContainer: {
         flexDirection: 'row',
-        width: '80%',
+        width: '85%',
         alignSelf: 'center',
         paddingVertical: 10,
     },
@@ -98,7 +108,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     infoElement: {
-        width: '50%',
+        flex: 1,
         justifyContent: 'center',
         paddingHorizontal: 10
     }

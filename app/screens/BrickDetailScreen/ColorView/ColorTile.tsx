@@ -10,9 +10,14 @@ export default function ColorTile(props: {
     return <View style={{...styles.tile, backgroundColor: "#" + props.partColor.hex }}>
         <View style={props.partColor.isTransparent ? styles.transparancyIndicator : {}}></View>
         <Text style={{
+            ...styles.sets,
+            color: isColorDark(props.partColor.hex ?? "ffffff") ? 'white' : 'black'
+        }}>{props.partColor.sets}</Text>
+        <Text style={{
             ...styles.text,
             color: isColorDark(props.partColor.hex ?? "ffffff") ? 'white' : 'black'
         }}>{props.partColor.colorName}</Text>
+        
     </View>
 }
 
@@ -27,6 +32,14 @@ const styles = StyleSheet.create({
         padding: 5,
         justifyContent: 'flex-end',
         overflow: 'hidden'
+    },
+    sets: {
+        position:'absolute',
+        right:5,
+        top: 5,
+        width:'100%',
+        textAlign:'right',
+        opacity:0.5,
     },
     transparancyIndicator: {
         position: 'absolute',
