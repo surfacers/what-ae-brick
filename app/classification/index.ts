@@ -2,6 +2,7 @@ import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-react-native';
 import { Image, ImageSourcePropType} from 'react-native';
 import { fetch, decodeJpeg, bundleResourceIO } from '@tensorflow/tfjs-react-native';
+import { Rank, Tensor } from '@tensorflow/tfjs';
 
 let model:tf.GraphModel | undefined;
 
@@ -21,7 +22,7 @@ export async function predict(image:string) : Promise<string> {
         const b = Buffer.from(image.replace("data:image/jpeg;base64,", ""), 'base64')
         const imageTensor =  decodeJpeg(b).reshape([1, 224, 224, 3]).asType('float32').div(255.0);
     
-        const prediction = model.predict([imageTensor]);
+        const prediction = model.predict([imageTensor]) as Tensor<Rank>;
         const class_id = prediction.as1D().argMax().dataSync()[0]
         return labels[class_id]
     }

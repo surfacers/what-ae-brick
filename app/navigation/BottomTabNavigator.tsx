@@ -7,6 +7,7 @@ import BrickDetailScreen from '../screens/BrickDetailScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import ScanScreen from '../screens/ScanScreen';
 import WishlistScreen from '../screens/WishlistScreen';
+import { ScanNavigator } from './ScanNavigator';
 import { BottomTabParamList, HistoryParamList, WishlistParamList } from '../types';
 
 // https://docs.nativebase.io/docs/examples/navigation/StackNavigationExample.html
@@ -64,9 +65,9 @@ export default function BottomTabNavigator() {
   const colorScheme = useColorScheme();
 
   return (
-    <BottomTab.Navigator tabBar={footer}>
+    <BottomTab.Navigator tabBar={footer} initialRouteName="Scan">
       <BottomTab.Screen name="History" component={HistoryNavigator} />
-      <BottomTab.Screen name="Scan" component={ScanScreen} />
+      <BottomTab.Screen name="Scan" component={ScanNavigator} />
       <BottomTab.Screen name="Wishlist" component={WishlistNavigator} />
     </BottomTab.Navigator>
   );

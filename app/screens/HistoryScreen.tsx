@@ -52,11 +52,6 @@ export default function HistoryScreen() {
             <Body>
                 <Title>History</Title>
             </Body>
-            <Right>
-                <Button transparent onPress={addToHistory}>
-                    <Text>Add</Text>
-                </Button>
-            </Right>
         </Header>{
             state.hasTag(HistoryTag.success)
                 ? <List data={state.context.parts ?? []}

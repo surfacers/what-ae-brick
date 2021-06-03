@@ -3,7 +3,7 @@
  * https://reactnavigation.org/docs/typescript/
  */
 
- export type RootStackParamList = {
+export type RootStackParamList = {
     Root: undefined
     NotFound: undefined
 }
@@ -22,7 +22,7 @@ export type HistoryParamList = {
 
 export type ScanParamList = {
     ScanScreen: undefined
-    ResultScreen: { id: string; certainty: number }
+    BrickDetailScreen: { partId: string } // TODO: sollen wir jetzt das Bild anzeigen (das gescannte?)
     ErrorScreen: { error: Error }
 };
 
