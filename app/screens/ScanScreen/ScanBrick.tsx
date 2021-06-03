@@ -315,12 +315,12 @@ export function ScanBrick() {
         originWhitelist={['*']}
         source={{ html: opencv }}
         onMessage={(e) => send(JSON.parse(e.nativeEvent.data))}
-        containerStyle={{ position: "absolute", width: 300, height: 300 }}
+        containerStyle={{ position: "absolute", width: 1, height: 1 }}
       />
-
-      {isVisible && <View style={styles.cameraContainer}>
-        <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9" >
-          {/* <View style={styles.debugContainer}>
+      <View style={styles.cameraContainer}>
+        {isVisible &&
+          <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9" >
+            {/* <View style={styles.debugContainer}>
             <Text style={styles.text}>
               State: {JSON.stringify(state.value, null, 2)}
             </Text>
@@ -344,10 +344,8 @@ export function ScanBrick() {
               ))}
             </View>
           </View> */}
-
-
-        </Camera>
-
+          </Camera>
+        }
         {state.hasTag("processing") ?
           <View style={styles.maskWrapper}>
             <Loading color="white" scale={0.5} text="Looking for answers..." />
@@ -357,7 +355,6 @@ export function ScanBrick() {
             <Mask />
           </View>
         }
-
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
@@ -370,8 +367,6 @@ export function ScanBrick() {
           {/* <Button title="Reset" onPress={() => send("RESTART")}></Button> */}
         </View>
       </View>
-      }
-
     </View>
   );
 }
