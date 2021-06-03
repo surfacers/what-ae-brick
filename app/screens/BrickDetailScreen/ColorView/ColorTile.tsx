@@ -1,3 +1,4 @@
+import { Icon } from 'native-base';
 import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from '../../../components/Themed';
@@ -7,17 +8,15 @@ import { isColorDark } from './ColorUtils';
 export default function ColorTile(props: {
     partColor: PartColorDto
 }) {
-    return <View style={{...styles.tile, backgroundColor: "#" + props.partColor.hex }}>
+    const color = isColorDark(props.partColor.hex ?? "ffffff") ? 'white' : 'black';
+    return <View style={{ ...styles.tile, backgroundColor: "#" + props.partColor.hex }}>
         <View style={props.partColor.isTransparent ? styles.transparancyIndicator : {}}></View>
-        <Text style={{
-            ...styles.sets,
-            color: isColorDark(props.partColor.hex ?? "ffffff") ? 'white' : 'black'
-        }}>{props.partColor.sets}</Text>
-        <Text style={{
-            ...styles.text,
-            color: isColorDark(props.partColor.hex ?? "ffffff") ? 'white' : 'black'
-        }}>{props.partColor.colorName}</Text>
-        
+        <View style={styles.sets}>
+            <Icon name='box' type='Feather' style={{color: color, ...styles.setIcon}} />
+            <Text style={{color: color}}>{props.partColor.sets}</Text>
+        </View>
+        <Text style={{...styles.text, color: color}}>{props.partColor.colorName}</Text>
+
     </View>
 }
 
@@ -34,12 +33,16 @@ const styles = StyleSheet.create({
         overflow: 'hidden'
     },
     sets: {
-        position:'absolute',
-        right:5,
+        position: 'absolute',
+        right: 5,
         top: 5,
-        width:'100%',
-        textAlign:'right',
-        opacity:0.5,
+        textAlign: 'right',
+        opacity: 0.5,
+        flexDirection: 'row',
+    },
+    setIcon:{
+        fontSize: 14,
+        marginRight: 2
     },
     transparancyIndicator: {
         position: 'absolute',

@@ -266,7 +266,9 @@ export function ScanBrick() {
   useFocusEffect(
     useCallback(() => {
       console.log("camera visible");
-      setIsVisible(true)
+      setTimeout(() => {
+        setIsVisible(true)
+      }, 300);
 
       return () => {
         setIsVisible(false);
@@ -318,7 +320,7 @@ export function ScanBrick() {
 
       {isVisible && <View style={styles.cameraContainer}>
         <Camera style={styles.camera} ref={cameraRef} pictureSize="Medium" ratio="16:9" >
-          <View style={styles.debugContainer}>
+          {/* <View style={styles.debugContainer}>
             <Text style={styles.text}>
               State: {JSON.stringify(state.value, null, 2)}
             </Text>
@@ -341,7 +343,7 @@ export function ScanBrick() {
                 />
               ))}
             </View>
-          </View>
+          </View> */}
 
 
         </Camera>
