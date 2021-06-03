@@ -15,14 +15,14 @@ type BrickDetailScreenRouteProp = StackScreenProps<HistoryParamList, 'BrickDetai
 export default function BrickDetailScreen({ route, navigation }: BrickDetailScreenRouteProp) {
     const [state, send] = useMachine(brickInfoMachine, {
         context: {
-            partId: route.params.brickId
+            partId: route.params.partId
         }
     });
 
     return <Container >
         <Header>
             <Body>
-                <Title>{route.params.brickId}</Title>
+                <Title>{route.params.partId}</Title>
             </Body>
         </Header>
         <Content>{

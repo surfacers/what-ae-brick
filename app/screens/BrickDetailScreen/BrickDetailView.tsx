@@ -7,7 +7,6 @@ import ColorView from './ColorView';
 import {predict} from '../../classification';
 import { StackActions } from '@react-navigation/routers';
 
-
 // TODO: put somewhere else
 const partImageUri = (partId: string, colorId: string) =>
     `https://cdn.rebrickable.com/media/thumbs/parts/ldraw/${colorId}/${partId}.png/230x230.png`
