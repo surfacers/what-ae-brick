@@ -6,3 +6,6 @@ React Native App is developed inside app folder.
 
 ## Data Preprocessing
 [See preproccessing folder](/preprocessing).
+
+## Tensorflow
+[See tensorflow folder](/tensorflow).
